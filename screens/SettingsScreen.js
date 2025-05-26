@@ -95,7 +95,7 @@ export default function SettingsScreen() {
             await Notifications.scheduleNotificationAsync({
                 content: {
                     title: 'Time to Study 🧠',
-                    body: 'Your daily Qbee quiz is ready!',
+                    body: 'Your daily ThinkB quiz is ready!',
                     sound: true,
 
                 },
