@@ -1,0 +1,439 @@
+{
+  "xmeml": {
+    "sequence": {
+      "name": "Timeline 1 (Resolve)",
+      "duration": 168,
+      "rate": {
+        "timebase": 24,
+        "ntsc": "FALSE"
+      },
+      "in": -1,
+      "out": -1,
+      "timecode": {
+        "string": "01:00:00:00",
+        "frame": 86400,
+        "displayformat": "NDF",
+        "rate": {
+          "timebase": 24,
+          "ntsc": "FALSE"
+        }
+      },
+      "media": {
+        "video": {
+          "track": [
+            {
+              "enabled": "TRUE",
+              "locked": "FALSE"
+            },
+            {
+              "clipitem": [
+                {
+                  "name": "ChatGPT Image May 26, 2025, 04_42_08 AM.png",
+                  "duration": 1440001,
+                  "rate": {
+                    "timebase": 24,
+                    "ntsc": "FALSE"
+                  },
+                  "start": 0,
+                  "end": 51,
+                  "enabled": "TRUE",
+                  "in": 86400,
+                  "out": 86451,
+                  "file": {
+                    "duration": 1,
+                    "rate": {
+                      "timebase": 24,
+                      "ntsc": "FALSE"
+                    },
+                    "name": "ChatGPT Image May 26, 2025, 04_42_08 AM.png",
+                    "pathurl": "file:///Users/sams/Downloads/ChatGPT%20Image%20May%2026,%202025,%2004_42_08%20AM.png",
+                    "timecode": {
+                      "string": "00:00:00:00",
+                      "displayformat": "NDF",
+                      "rate": {
+                        "timebase": 24,
+                        "ntsc": "FALSE"
+                      }
+                    },
+                    "media": {
+                      "video": {
+                        "duration": 1,
+                        "samplecharacteristics": {
+                          "width": 1920,
+                          "height": 1080
+                        }
+                      }
+                    }
+                  },
+                  "compositemode": "normal",
+                  "filter": [
+                    {
+                      "enabled": "TRUE",
+                      "start": 0,
+                      "end": 1440001,
+                      "effect": {
+                        "name": "Basic Motion",
+                        "effectid": "basic",
+                        "effecttype": "motion",
+                        "mediatype": "video",
+                        "effectcategory": "motion",
+                        "parameter": [
+                          {
+                            "name": "Scale",
+                            "parameterid": "scale",
+                            "value": 94,
+                            "valuemin": 0,
+                            "valuemax": 10000
+                          },
+                          {
+                            "name": "Center",
+                            "parameterid": "center",
+                            "value": {
+                              "horiz": 0.157812,
+                              "vert": 0
+                            }
+                          },
+                          {
+                            "name": "Rotation",
+                            "parameterid": "rotation",
+                            "value": 0,
+                            "valuemin": -100000,
+                            "valuemax": 100000
+                          },
+                          {
+                            "name": "Anchor Point",
+                            "parameterid": "centerOffset",
+                            "value": {
+                              "horiz": 0,
+                              "vert": 0
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "enabled": "TRUE",
+                      "start": 0,
+                      "end": 1440001,
+                      "effect": {
+                        "name": "Crop",
+                        "effectid": "crop",
+                        "effecttype": "motion",
+                        "mediatype": "video",
+                        "effectcategory": "motion",
+                        "parameter": [
+                          {
+                            "name": "left",
+                            "parameterid": "left",
+                            "value": 0,
+                            "valuemin": 0,
+                            "valuemax": 100
+                          },
+                          {
+                            "name": "right",
+                            "parameterid": "right",
+                            "value": 0,
+                            "valuemin": 0,
+                            "valuemax": 100
+                          },
+                          {
+                            "name": "top",
+                            "parameterid": "top",
+                            "value": 0,
+                            "valuemin": 0,
+                            "valuemax": 100
+                          },
+                          {
+                            "name": "bottom",
+                            "parameterid": "bottom",
+                            "value": 0,
+                            "valuemin": 0,
+                            "valuemax": 100
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "enabled": "TRUE",
+                      "start": 0,
+                      "end": 1440001,
+                      "effect": {
+                        "name": "Opacity",
+                        "effectid": "opacity",
+                        "effecttype": "motion",
+                        "mediatype": "video",
+                        "effectcategory": "motion",
+                        "parameter": {
+                          "name": "opacity",
+                          "parameterid": "opacity",
+                          "value": 100,
+                          "valuemin": 0,
+                          "valuemax": 100
+                        }
+                      }
+                    },
+                    {
+                      "enabled": "TRUE",
+                      "start": -1,
+                      "end": -1,
+                      "effect": {
+                        "name": "Time Remap",
+                        "effectid": "timeremap",
+                        "effecttype": "motion",
+                        "mediatype": "video",
+                        "effectcategory": "motion",
+                        "parameter": [
+                          {
+                            "name": "speed",
+                            "parameterid": "speed",
+                            "value": 0,
+                            "valuemin": -10000,
+                            "valuemax": 10000
+                          },
+                          {
+                            "name": "reverse",
+                            "parameterid": "reverse",
+                            "value": "FALSE"
+                          },
+                          {
+                            "name": "frameblending",
+                            "parameterid": "frameblending",
+                            "value": "FALSE"
+                          },
+                          {
+                            "name": "variablespeed",
+                            "parameterid": "variablespeed",
+                            "value": 0,
+                            "valuemin": 0,
+                            "valuemax": 1
+                          },
+                          {
+                            "name": "graphdict",
+                            "parameterid": "graphdict",
+                            "keyframe": [
+                              {
+                                "when": 0,
+                                "value": 0,
+                                "speedvirtualkf": "TRUE",
+                                "speedkfstart": "TRUE"
+                              },
+                              {
+                                "when": 86400,
+                                "value": 0,
+                                "speedvirtualkf": "TRUE",
+                                "speedkfin": "TRUE"
+                              },
+                              {
+                                "when": 86451,
+                                "value": 0,
+                                "speedvirtualkf": "TRUE",
+                                "speedkfout": "TRUE"
+                              },
+                              {
+                                "when": 1440001,
+                                "value": 1,
+                                "speedvirtualkf": "TRUE",
+                                "speedkfend": "TRUE"
+                              }
+                            ],
+                            "valuemin": 0,
+                            "valuemax": 0,
+                            "interpolation": {
+                              "name": "FCPCurve"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "comments": ""
+                },
+                {
+                  "name": "Fusion Composition",
+                  "duration": 120,
+                  "rate": {
+                    "timebase": 24,
+                    "ntsc": "FALSE"
+                  },
+                  "start": 51,
+                  "end": 168,
+                  "enabled": "TRUE",
+                  "in": -21,
+                  "out": 96,
+                  "file": {
+                    "duration": 120,
+                    "rate": {
+                      "timebase": 24,
+                      "ntsc": "FALSE"
+                    },
+                    "name": "Slug",
+                    "timecode": {
+                      "string": "00:00:00:00",
+                      "displayformat": "NDF",
+                      "rate": {
+                        "timebase": 24,
+                        "ntsc": "FALSE"
+                      }
+                    },
+                    "media": {
+                      "video": {
+                        "samplecharacteristics": {
+                          "width": 1920,
+                          "height": 1080
+                        }
+                      }
+                    },
+                    "mediaSource": "Slug"
+                  },
+                  "compositemode": "normal",
+                  "filter": [
+                    {
+                      "enabled": "TRUE",
+                      "start": 0,
+                      "end": 120,
+                      "effect": {
+                        "name": "Basic Motion",
+                        "effectid": "basic",
+                        "effecttype": "motion",
+                        "mediatype": "video",
+                        "effectcategory": "motion",
+                        "parameter": [
+                          {
+                            "name": "Scale",
+                            "parameterid": "scale",
+                            "value": 100,
+                            "valuemin": 0,
+                            "valuemax": 10000
+                          },
+                          {
+                            "name": "Center",
+                            "parameterid": "center",
+                            "value": {
+                              "horiz": 0,
+                              "vert": 0
+                            }
+                          },
+                          {
+                            "name": "Rotation",
+                            "parameterid": "rotation",
+                            "value": 0,
+                            "valuemin": -100000,
+                            "valuemax": 100000
+                          },
+                          {
+                            "name": "Anchor Point",
+                            "parameterid": "centerOffset",
+                            "value": {
+                              "horiz": 0,
+                              "vert": 0
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "enabled": "TRUE",
+                      "start": 0,
+                      "end": 120,
+                      "effect": {
+                        "name": "Crop",
+                        "effectid": "crop",
+                        "effecttype": "motion",
+                        "mediatype": "video",
+                        "effectcategory": "motion",
+                        "parameter": [
+                          {
+                            "name": "left",
+                            "parameterid": "left",
+                            "value": 0,
+                            "valuemin": 0,
+                            "valuemax": 100
+                          },
+                          {
+                            "name": "right",
+                            "parameterid": "right",
+                            "value": 0,
+                            "valuemin": 0,
+                            "valuemax": 100
+                          },
+                          {
+                            "name": "top",
+                            "parameterid": "top",
+                            "value": 0,
+                            "valuemin": 0,
+                            "valuemax": 100
+                          },
+                          {
+                            "name": "bottom",
+                            "parameterid": "bottom",
+                            "value": 0,
+                            "valuemin": 0,
+                            "valuemax": 100
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "enabled": "TRUE",
+                      "start": 0,
+                      "end": 120,
+                      "effect": {
+                        "name": "Opacity",
+                        "effectid": "opacity",
+                        "effecttype": "motion",
+                        "mediatype": "video",
+                        "effectcategory": "motion",
+                        "parameter": {
+                          "name": "opacity",
+                          "parameterid": "opacity",
+                          "value": 100,
+                          "valuemin": 0,
+                          "valuemax": 100
+                        }
+                      }
+                    }
+                  ],
+                  "comments": ""
+                }
+              ],
+              "enabled": "TRUE",
+              "locked": "FALSE"
+            }
+          ],
+          "format": {
+            "samplecharacteristics": {
+              "width": 1920,
+              "height": 1080,
+              "pixelaspectratio": "square",
+              "rate": {
+                "timebase": 24,
+                "ntsc": "FALSE"
+              },
+              "codec": {
+                "appspecificdata": {
+                  "appname": "Final Cut Pro",
+                  "appmanufacturer": "Apple Inc.",
+                  "data": {
+                    "qtcodec": ""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "audio": {
+          "track": [
+            {
+              "enabled": "TRUE",
+              "locked": "FALSE"
+            },
+            {
+              "enabled": "TRUE",
+              "locked": "FALSE"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

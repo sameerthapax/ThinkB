@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF Parser</title>
+  <script src="pdf.js"></script>
+</head>
+<body>
+  <script>
+    document.addEventListener("message", function(event) {
+      const base64 = event.data;
+      const pdfData = atob(base64);
+      const uint8Array = new Uint8Array(pdfData.length);
+      for (let i = 0; i < pdfData.length; i++) {
+        uint8Array[i] = pdfData.charCodeAt(i);
+      }
+
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+      pdfjsLib.getDocument({ data: uint8Array }).promise.then(async function (pdf) {
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items.map(item => item.str).join(' ');
+          fullText += pageText + '\n';
+        }
+        window.ReactNativeWebView.postMessage(fullText);
+      });
+    });
+  </script>
+</body>
+</html>
