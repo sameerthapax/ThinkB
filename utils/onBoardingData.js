@@ -1,13 +1,22 @@
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import { Text } from '@ui-kitten/components';
+import LottieView from 'lottie-react-native';
+
 
 export const onboardingSlides = [
     {
         key: '1',
         component: () => (
             <View style={styles.slide}>
-
+                <LottieView
+                    source={require('../assets/welcomeScreen1.json')}
+                    autoPlay
+                    loop={false}
+                    style={{ width: 400, height:400, marginBottom: 30 }}
+                />
+                <Text category="h4" style={styles.title}>Welcome to ThinkB!</Text>
+                <Text style={styles.text}>Your personal AI quiz companion.</Text>
             </View>
         ),
     },
