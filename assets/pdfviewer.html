@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PDF Text Extractor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        #status {
+            font-size: 16px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+<h3>PDF Text Extractor</h3>
+<p id="status">Waiting for PDF...</p>
+
+<script>
+    window.loadPdfFromBase64 = async function(base64) {
+        try {
+            document.getElementById("status").innerText = "Parsing PDF...";
+            const binary = atob(base64);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+
+            const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+            let fullText = '';
+
+            for (let i = 0; i < pdf.numPages; i++) {
+                const page = await pdf.getPage(i + 1);
+                const textContent = await page.getTextContent();
+                const text = textContent.items.map(item => item.str).join(' ');
+                fullText += text + '\n\n';
+            }
+
+            document.getElementById("status").innerText = "✅ Text extracted. Sending to app...";
+            window.ReactNativeWebView.postMessage(fullText);
+        } catch (err) {
+            console.error("❌ PDF Parsing Error:", err);
+            document.getElementById("status").innerText = "Error extracting text.";
+            window.ReactNativeWebView.postMessage('');
+        }
+    };
+</script>
+</body>
+</html>

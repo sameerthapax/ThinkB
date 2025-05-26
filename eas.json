@@ -1,0 +1,18 @@
+{
+  "build": {
+    "production": {
+      "developmentClient": false,
+      "distribution": "store",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      }
+    }
+  }
+}

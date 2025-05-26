@@ -4,7 +4,7 @@ export const parseQuizText = (text) => {
   let i = 0;
 
   while (i < lines.length) {
-    const qLine = lines[i++]; // e.g. "10. Which ensemble..."
+    const qLine = lines[i++];
     const qMatch = qLine.match(/^\d+\.\s+(.*)$/);
     if (!qMatch) continue;
 
@@ -13,12 +13,15 @@ export const parseQuizText = (text) => {
     const options = [];
     for (let j = 0; j < 4; j++) {
       const line = lines[i++] || '';
-      const optMatch = line.match(/^[A-D]\.\s+(.*)$/);
-      options.push(optMatch ? optMatch[1] : '');
+      const optMatch = line.match(/^[A-D][.)]?\s+(.*)$/); // Handles A. or A)
+      options.push(optMatch ? optMatch[1].trim() : '');
     }
 
     const answerLine = lines[i++] || '';
-    const ansMatch = answerLine.match(/^Correct Answer:\s+([A-D])\.?\s*(.*)?$/);
+    console.log('📌 Answer Line Raw:', answerLine);
+
+    const ansMatch = answerLine.match(/^Correct\s*Answer[:\-]?\s*([A-D])[.)]?\s*(.*)$/i);
+    console.log('✅ Parsed Answer:', ansMatch?.[1], 'Explanation:', ansMatch?.[2]);
 
     questions.push({
       question: questionText,

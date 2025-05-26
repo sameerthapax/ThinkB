@@ -1,29 +1,51 @@
 {
   "expo": {
-    "name": "Qbee",
-    "slug": "Qbee",
+    "name": "ThinkB",
+    "slug": "ThinkB",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "plugins": [
+      "expo-notifications",
+      "expo-background-task",
+      "expo-asset"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sameerthapa.ThinkB",
+      "buildNumber": "2",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": "processing"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.sameerthapa.ThinkB"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "owner": "sameerthapa",
+    "runtimeVersion": "1.0.1",
+    "updates": {
+      "url": "https://u.expo.dev/854fefc9-0d98-40aa-b3dd-e70b7bc3f30b"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "854fefc9-0d98-40aa-b3dd-e70b7bc3f30b"
+      }
     }
   }
 }
