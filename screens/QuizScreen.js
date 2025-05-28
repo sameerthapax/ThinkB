@@ -71,23 +71,34 @@ export default function QuizScreen() {
             };
 
             const updateStreak = async () => {
-                const today = new Date().toISOString().split('T')[0];
-                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+                const getLocalDate = (offsetDays = 0) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + offsetDays);
+                    return d.toLocaleDateString('en-CA'); // format: YYYY-MM-DD
+                };
+
+                const today = getLocalDate();
+                const yesterday = getLocalDate(-1);
                 const stored = await AsyncStorage.getItem('quiz-streak');
                 const streakData = stored ? JSON.parse(stored) : { lastDate: null, streak: 0 };
 
-                let newStreak = 1;
+                let newStreak = 0;
+
                 if (streakData.lastDate === yesterday) {
                     newStreak = streakData.streak + 1;
                 } else if (streakData.lastDate === today) {
                     newStreak = streakData.streak;
+                } else {
+                    newStreak = 0; // Explicit reset if user missed a day
                 }
+
 
                 await AsyncStorage.setItem('quiz-streak', JSON.stringify({
                     lastDate: today,
                     streak: newStreak,
                 }));
             };
+
 
             Animated.timing(fadeAnim, {
                 toValue: 1,

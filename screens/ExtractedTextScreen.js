@@ -4,7 +4,7 @@ import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateQuizFromText } from '../utils/generateQuiz';
-import { parseQuizText } from '../utils/parseQuiz';
+import { parseQuizJson } from '../utils/parseQuiz';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 
@@ -29,7 +29,7 @@ export default function ExtractedTextScreen() {
                 difficulty: parsedSettings.difficulty,
             });
 
-            const parsedQuiz = parseQuizText(rawQuizText);
+            const parsedQuiz = parseQuizJson(rawQuizText);
             const todayKey = `quiz-${new Date().toISOString().split('T')[0]}`;
             await AsyncStorage.setItem(todayKey, JSON.stringify(parsedQuiz));
 
@@ -49,7 +49,7 @@ export default function ExtractedTextScreen() {
             setShowCheckmark(true);
 
             setTimeout(() => {
-                navigation.navigate('MainTabs',{screen: 'Quiz'});
+                navigation.navigate('ThinkB',{screen: 'Quiz'});
             }, 1500);
         } catch (error) {
             console.error(error);

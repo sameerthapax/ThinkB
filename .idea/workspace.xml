@@ -4,15 +4,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b537e8dd-73da-494f-87af-527184f45e1b" name="Changes" comment="changed names">
-      <change afterPath="$PROJECT_DIR$/assets/welcomeScreen1.json" afterDir="false" />
+    <list default="true" id="b537e8dd-73da-494f-87af-527184f45e1b" name="Changes" comment="designing boarding screen">
+      <change afterPath="$PROJECT_DIR$/assets/CountdownAnimation.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/brainStromingAnimation.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/logoAnimation.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/OnBoardingSlide1.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/OnBoardingSlide2.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/OnBoardingSlide3.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screens/ExtractedTextScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/ExtractedTextScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screens/HomeScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/HomeScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screens/OnboardingScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/OnboardingScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screens/QuizScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/screens/QuizScreen.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/generateQuiz.js" beforeDir="false" afterPath="$PROJECT_DIR$/utils/generateQuiz.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/onBoardingData.js" beforeDir="false" afterPath="$PROJECT_DIR$/utils/onBoardingData.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/parseQuiz.js" beforeDir="false" afterPath="$PROJECT_DIR$/utils/parseQuiz.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -75,7 +93,7 @@
       <option name="presentableId" value="Default" />
       <updated>1748287297678</updated>
       <workItem from="1748287298796" duration="124000" />
-      <workItem from="1748287425049" duration="768000" />
+      <workItem from="1748287425049" duration="23022000" />
     </task>
     <task id="LOCAL-00001" summary="changed names">
       <option name="closed" value="true" />
@@ -85,7 +103,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748287388072</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="designing boarding screen">
+      <option name="closed" value="true" />
+      <created>1748289761443</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1748289761443</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -93,6 +119,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="changed names" />
-    <option name="LAST_COMMIT_MESSAGE" value="changed names" />
+    <MESSAGE value="designing boarding screen" />
+    <option name="LAST_COMMIT_MESSAGE" value="designing boarding screen" />
   </component>
 </project>

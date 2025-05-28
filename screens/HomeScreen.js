@@ -193,13 +193,13 @@ export default function HomeScreen({ navigation }) {
 
 
             {/*</View>*/}
-                <View style={styles.grid}>
-                    <Button
-                        style={styles.menuButton}
-                        onPress={async () => await AsyncStorage.setItem('hasSeenOnboarding', 'false')}>
+            {/*    <View style={styles.grid}>*/}
+            {/*        <Button*/}
+            {/*            style={styles.menuButton}*/}
+            {/*            onPress={async () => await AsyncStorage.setItem('hasSeenOnboarding', 'false')}>*/}
 
-                    </Button>
-                </View>
+            {/*        </Button>*/}
+            {/*    </View>*/}
 
             </View>
 

@@ -35,9 +35,9 @@ export default function OnboardingScreen({ navigation }) {
                 horizontal
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => (
+                renderItem={({  item, index  }) => (
                     <View style={{ width }}>
-                        {item.component()}
+                        <item.component isActive={currentIndex === index} />
                     </View>
                 )}
                 onMomentumScrollEnd={(event) => {

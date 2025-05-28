@@ -1,35 +1,34 @@
-export const parseQuizText = (text) => {
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-  const questions = [];
-  let i = 0;
+export const parseQuizJson = (text) => {
+  try {
+    // Extract the JSON portion from any surrounding log or text
+    const jsonStart = text.indexOf('[');
+    const jsonEnd = text.lastIndexOf(']') + 1;
 
-  while (i < lines.length) {
-    const qLine = lines[i++];
-    const qMatch = qLine.match(/^\d+\.\s+(.*)$/);
-    if (!qMatch) continue;
-
-    const questionText = qMatch[1];
-
-    const options = [];
-    for (let j = 0; j < 4; j++) {
-      const line = lines[i++] || '';
-      const optMatch = line.match(/^[A-D][.)]?\s+(.*)$/); // Handles A. or A)
-      options.push(optMatch ? optMatch[1].trim() : '');
+    if (jsonStart === -1 || jsonEnd === -1) {
+      throw new Error('JSON array not found in the input.');
     }
 
-    const answerLine = lines[i++] || '';
-    console.log('📌 Answer Line Raw:', answerLine);
+    const jsonString = text.slice(jsonStart, jsonEnd);
+    const rawArray = JSON.parse(jsonString);
 
-    const ansMatch = answerLine.match(/^Correct\s*Answer[:\-]?\s*([A-D])[.)]?\s*(.*)$/i);
-    console.log('✅ Parsed Answer:', ansMatch?.[1], 'Explanation:', ansMatch?.[2]);
+    const parsed = rawArray.map((q) => {
+      const correctAnswerIndex = q.choices.indexOf(q.answer);
+      return {
+        question: q.question,
+        choices: q.choices,
+        correctAnswerIndex,
+        explanation: q.answer,
+      };
+    }).filter(q =>
+        q.question &&
+        Array.isArray(q.choices) &&
+        q.choices.length === 4 &&
+        q.correctAnswerIndex >= 0
+    );
 
-    questions.push({
-      question: questionText,
-      choices: options,
-      correctAnswerIndex: 'ABCD'.indexOf(ansMatch?.[1]),
-      explanation: ansMatch?.[2] || '',
-    });
+    return parsed;
+  } catch (err) {
+    console.error('❌ Failed to parse quiz JSON:', err.message);
+    return [];
   }
-
-  return questions;
 };

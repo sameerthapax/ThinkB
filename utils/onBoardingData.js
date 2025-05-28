@@ -2,43 +2,25 @@ import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import { Text } from '@ui-kitten/components';
 import LottieView from 'lottie-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import OnBoardingSlide1 from '../components/OnBoardingSlide1';
+import OnBoardingSlide2 from '../components/OnBoardingSlide2';
+import OnBoardingSlide3 from '../components/OnBoardingSlide3';
 
 
 export const onboardingSlides = [
     {
         key: '1',
-        component: () => (
-            <View style={styles.slide}>
-                <LottieView
-                    source={require('../assets/welcomeScreen1.json')}
-                    autoPlay
-                    loop={false}
-                    style={{ width: 400, height:400, marginBottom: 30 }}
-                />
-                <Text category="h4" style={styles.title}>Welcome to ThinkB!</Text>
-                <Text style={styles.text}>Your personal AI quiz companion.</Text>
-            </View>
-        ),
+        component: OnBoardingSlide1
     },
     {
         key: '2',
-        component: () => (
-            <View style={styles.slide}>
-                <Image source={require('../assets/favicon.png')} style={styles.image} />
-                <Text category="h4" style={styles.title}>Track Your Streaks 🔥</Text>
-                <Text style={styles.text}>Stay consistent and unlock rewards.</Text>
-            </View>
-        ),
+        component: OnBoardingSlide2,
     },
     {
         key: '3',
-        component: () => (
-            <View style={styles.slide}>
-                <Image source={require('../assets/splash-icon.png')} style={styles.image} />
-                <Text category="h4" style={styles.title}>View Your Progress 📈</Text>
-                <Text style={styles.text}>Review past quizzes and improve weak spots.</Text>
-            </View>
-        ),
+        component: OnBoardingSlide3,
+
     },
 ];
 
@@ -58,6 +40,16 @@ const styles = StyleSheet.create({
     title: {
         marginBottom: 10,
         textAlign: 'center',
+    },titleT: {
+        marginBottom: 10,
+        textAlign: 'center',
+        color: '#8538e3',
+    },
+    titleB: {
+        marginBottom: 10,
+        textAlign: 'center',
+        fontWeight: '800',
+
     },
     text: {
         textAlign: 'center',

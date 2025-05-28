@@ -21,32 +21,47 @@ export async function generateQuizFromText(content, options = {}) {
 
         const prompt = `
 Generate ${numberOfQuestions} ${difficulty} multiple-choice questions based on the following study material. 
-Each question should have 4 options (A, B, C, D), and clearly indicate the correct answer.
+Each question should have 4 options (A, B, C, D), and clearly indicate the correct answer index (0-3).
 
-Content:
+⚠️ Return the result as a JSON array of objects in the following format (do not include any explanation outside the JSON):
+
+[
+  {
+    "question": "Your question here?",
+    "choices": ["Option A", "Option B", "Option C", "Option D"],
+    "correctAnswerIndex": 1,
+    "explanation": "Short explanation of the correct answer"
+  },
+  ...
+]
+
+Study Material:
 ${content}
 `;
 
+
+
         const response = await axios.post(
-            'https://api.openai.com/v1/chat/completions',
+            'http://5.161.80.216:3000/generate',
             {
-                model: 'gpt-3.5-turbo',
-                messages: [{ role: 'user', content: prompt }],
-                temperature: 0.7,
+                model: 'llama3.2:1b',
+                prompt: prompt,
+                stream: false,
             },
             {
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${OPENAI_API_KEY}`,
+                    'x-api-key': 'f/@*(w*Q3l`tfZI',
                 },
             }
         );
 
-        const quiz = response.data.choices[0].message.content;
+        const quiz = response.data.response;
         await AsyncStorage.setItem(cacheKey, quiz);
+        console.log('✅ Quiz generated and cached successfully:',quiz );
         return quiz;
     } catch (error) {
-        console.error('OpenAI API error:', error.message);
+        console.error('Llama error:', error.message);
         return null;
     }
 }
