@@ -79,12 +79,15 @@ export default function UploadScreen() {
 
             {loading && !done && <ActivityIndicator size="large" color="#3366FF" />}
             {done && (
+                <View>
                 <LottieView
                     source={require('../assets/checkmark.json')}
                     autoPlay
                     loop={false}
                     style={styles.lottie}
                 />
+                <Text category='s1' style={styles.heading}>Parsing your data... This might take some time.</Text>
+                </View>
             )}
         </Layout>
     );

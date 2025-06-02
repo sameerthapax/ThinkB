@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Text, Button, Card } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
@@ -29,6 +29,19 @@ export default function HistoryScreen() {
         await AsyncStorage.setItem(todayKey, JSON.stringify(quiz));
         navigation.navigate('ThinkB',{screen: 'Quiz',  params: { reset: true, Quiz: quiz }});
     };
+    const renderRightActions = (navigation) => (
+        <TouchableOpacity
+            onPress={() => navigation.navigate('MyQuizzes')}
+            style={{ marginRight: 16 }}
+        >
+            <Text style={{ color: '#007aff', fontSize: 16 }}>My Quizzes</Text>
+        </TouchableOpacity>
+    );
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => renderRightActions(navigation),
+        });
+    }, [navigation]);
 
     if (!history.length) {
         return (
@@ -39,8 +52,8 @@ export default function HistoryScreen() {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingBottom:'30%' } } edges={['bottom']}>
-        <FlatList
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0)' } } edges={['']}>
+            <FlatList
             contentContainerStyle={styles.container}
             data={history}
             keyExtractor={(item, index) => item.date + index}
@@ -66,7 +79,7 @@ export default function HistoryScreen() {
                 </Card>
 
             )}
-        />
+            />
         </SafeAreaView>
     );
 }
@@ -74,7 +87,8 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
-        paddingBottom: 30,
+        paddingBottom: 80,
+        backgroundColor: 'rgba(255,255,255,0)',
     },
     card: {
         marginBottom: 16,

@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, TouchableOpacity  } from 'react-native';
 import { Text } from '@ui-kitten/components';
 import { Button } from 'react-native-paper';
 import LottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -86,8 +85,11 @@ export default function QuizScreen() {
 
                 if (streakData.lastDate === yesterday) {
                     newStreak = streakData.streak + 1;
-                } else if (streakData.lastDate === today) {
-                    newStreak = streakData.streak;
+                }
+                else if (streakData.lastDate === today) {
+                    newStreak = streakData.streak; // No change if already done today
+                } else if (streakData.lastDate === null || streakData.lastDate < yesterday) {
+                    newStreak = 0; // First quiz of the streak
                 } else {
                     newStreak = 0; // Explicit reset if user missed a day
                 }
@@ -117,6 +119,20 @@ export default function QuizScreen() {
             }).start();
         }
     }, [finished]);
+    const renderRightActions = (navigation) => {
+        if (!isReview) return (
+        <TouchableOpacity
+            onPress={() => navigation.navigate('QuizBuilderStart')}
+            style={{ marginRight: 16 }}
+        >
+            <Text style={{ color: '#007aff', fontSize: 16 }}>Create</Text>
+        </TouchableOpacity>
+    )};
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => renderRightActions(navigation),
+        });
+    }, [navigation]);
 
     const handleFinish = () => {
         navigation.navigate(isReview ? 'History' : 'Home');
@@ -137,7 +153,7 @@ export default function QuizScreen() {
         }
     };
 
-    if (!quiz.length) return <Text style={styles.status}>Loading...</Text>;
+    if (!quiz.length) return <Text style={styles.status}>No Quiz Found! 🥲</Text>;
 
     if (finished) {
         return (
@@ -161,7 +177,7 @@ export default function QuizScreen() {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingBottom:20 } } edges={['bottom']}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingBottom:'50%' } } edges={['bottom']}>
 
         <View style={styles.container}>
             <Text category="s1" style={styles.progress}>Question {index + 1} of {quiz.length}</Text>
@@ -198,7 +214,7 @@ export default function QuizScreen() {
                         source={isCorrect ? require('../assets/correctAnswer.json') : require('../assets/wrongAnswer.json')}
                         autoPlay
                         loop={false}
-                        style={{ width: 100, height: 100, alignSelf: 'center', marginVertical: 10 }}
+                        style={{ width: 80, height: 80, alignSelf: 'center', marginVertical: 0 }}
                     />
                     <Text style={isCorrect ? styles.correctResult : styles.incorrectResult}>
                         {isCorrect ? 'Correct!' : `Incorrect. Correct Answer:\n${current?.explanation}`}
@@ -214,12 +230,12 @@ export default function QuizScreen() {
             ) : isReview ? (
                 <>
                     <Text style={styles.reviewExplanation}>
-                        {`Correct Answer: ${current?.explanation}`}
+                        {`Correct Answer: ${current?.choices[current.correctAnswerIndex]}`}
                     </Text>
                     <Button
                         mode="outlined"
                         onPress={handleNext}
-                        style={styles.button}
+                        style={styles.buttonNext}
                     >
                         {index + 1 < quiz.length ? 'Next Question' : 'Finish Quiz'}
                     </Button>
@@ -231,7 +247,7 @@ export default function QuizScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 24, justifyContent: 'center', backgroundColor: '#fff' },
+    container: { flex: 1, padding: 24, justifyContent: 'center', backgroundColor: '#fff',},
     progress: { fontSize: 18, color: '#555', marginBottom: 10 },
     question: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
     choiceButton: {
@@ -255,10 +271,10 @@ const styles = StyleSheet.create({
     },
 
 
-    button: { marginTop: 20 },
-    correctResult: { fontSize: 20, textAlign: 'center', color: 'green', marginTop: 10 },
-    incorrectResult: { fontSize: 18, textAlign: 'center', color: 'red', marginTop: 10 },
-    reviewExplanation: { fontSize: 16, textAlign: 'center', color: '#666', marginTop: 20 },
+    button: { marginTop: 2 },buttonNext: { marginTop: 0},
+    correctResult: { fontSize: 20, textAlign: 'center', color: 'green', marginTop: 0 },
+    incorrectResult: { fontSize: 15, textAlign: 'center', color: 'red', marginTop: 0 },
+    reviewExplanation: { fontSize: 15, textAlign: 'center', color: '#666', marginTop: 5 },
     status: { padding: 24, textAlign: 'center', fontSize: 18 },
     finalText: { fontSize: 26, textAlign: 'center', marginVertical: 20, fontWeight: 'bold' },
     scoreText: { fontSize: 20, textAlign: 'center', color: '#222' },

@@ -1,6 +1,6 @@
 export const parseQuizJson = (text) => {
   try {
-    // Extract the JSON portion from any surrounding log or text
+    // Step 1: Locate the JSON array in the text
     const jsonStart = text.indexOf('[');
     const jsonEnd = text.lastIndexOf(']') + 1;
 
@@ -12,12 +12,23 @@ export const parseQuizJson = (text) => {
     const rawArray = JSON.parse(jsonString);
 
     const parsed = rawArray.map((q) => {
-      const correctAnswerIndex = q.choices.indexOf(q.answer);
+      // If format is using 'answer', calculate the index
+      if (typeof q.correctAnswerIndex === 'undefined' && q.answer) {
+        const index = q.choices.indexOf(q.answer);
+        return {
+          question: q.question,
+          choices: q.choices,
+          correctAnswerIndex: index,
+          explanation: q.answer,
+        };
+      }
+
+      // If format already has correctAnswerIndex and explanation
       return {
         question: q.question,
         choices: q.choices,
-        correctAnswerIndex,
-        explanation: q.answer,
+        correctAnswerIndex: q.correctAnswerIndex,
+        explanation: q.explanation || q.choices[q.correctAnswerIndex] || '',
       };
     }).filter(q =>
         q.question &&

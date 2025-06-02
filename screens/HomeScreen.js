@@ -1,7 +1,7 @@
 import React, {useState, useCallback, useEffect, useRef} from 'react';
-import {View, StyleSheet, ScrollView, StatusBar, Image} from 'react-native';
+import {View, StyleSheet, ScrollView, StatusBar, Image, Dimensions} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Layout, Text, Button } from '@ui-kitten/components';
+import { Layout, Text, Button, Icon, TopNavigationAction } from '@ui-kitten/components';
 import { CircularProgressBar } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -34,6 +34,7 @@ const logAsyncStorage = async () => {
     }
 };
 
+const screenHeight = Dimensions.get('window').height;
 export default function HomeScreen({ navigation }) {
     const [streak, setStreak] = useState(0);
     const [todayScore, setTodayScore] = useState(0);
@@ -68,6 +69,18 @@ export default function HomeScreen({ navigation }) {
 
         return () => clearInterval(interval);
     }, []));
+    const InfoIcon = (props) => <Icon {...props} name="arrow-circle-up" />;
+    const renderRightActions = (navigation) => (
+        <TopNavigationAction
+            icon={InfoIcon}
+            onPress={() => navigation.navigate('Materials')}
+        />
+    );
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => renderRightActions(navigation),
+        });
+    }, [navigation]);
 
 
 
@@ -227,6 +240,8 @@ const styles = StyleSheet.create({
         padding: 24,
         marginBottom: 24,
         alignItems: 'center',
+        height: screenHeight * 0.3,
+        width: '100%',
     },
     animatedLogo: {
         width: 200,
@@ -258,6 +273,8 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         padding: 16,
         marginBottom: 24,
+        height: screenHeight * 0.165,
+        width: '100%',
     },
     cardTitle: {
         fontSize: 18,
@@ -307,6 +324,8 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         padding: 16,
         marginBottom: 24,
+
+
     },
     todayScoreInnerCard: {
         backgroundColor: 'rgba(224,224,224,0.7)',
@@ -316,16 +335,18 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         flexDirection: 'row',
         gap: '10%',
+        height: screenHeight * 0.15,
+        width: '100%',
     },
     todayScore: {
         alignSelf: 'flex-start',
-        marginTop: 16,
+        marginVertical: 'auto',
         color: '#cc0c0c',
     },
     todayScoreTextArea: {
         color: '#000',
-        marginTop: 16,
         alignSelf: 'center',
+        marginVertical: 'auto',
     },
     todayScoreText: {
         fontSize: 20,

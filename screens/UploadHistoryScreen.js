@@ -37,6 +37,9 @@ export default function UploadHistoryScreen() {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingBottom:0 } } edges={['bottom']}>
+            {materials.length === 0 ?(
+                <Text appearance="hint" style={styles.emptyText}>You haven’t uploaded any materials yet.</Text>
+            ):(
         <Layout style={styles.container}>
             <FlatList
                 data={materials}
@@ -45,6 +48,7 @@ export default function UploadHistoryScreen() {
                 contentContainerStyle={styles.list}
             />
         </Layout>
+                )}
         </SafeAreaView>
     );
 }
@@ -82,5 +86,9 @@ const styles = StyleSheet.create({
     excerpt: {
         fontSize: 14,
         color: '#444',
+    },
+    emptyText: {
+        marginTop: 24,
+        textAlign: 'center',
     },
 });

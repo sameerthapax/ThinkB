@@ -49,7 +49,7 @@ export default function ExtractedTextScreen() {
             setShowCheckmark(true);
 
             setTimeout(() => {
-                navigation.navigate('ThinkB',{screen: 'Quiz'});
+                navigation.navigate('ThinkB',{screen: 'Quiz' , params: { Quiz: parsedQuiz } });
             }, 1500);
         } catch (error) {
             console.error(error);
@@ -68,13 +68,16 @@ export default function ExtractedTextScreen() {
                 {loading ? (
                     <ActivityIndicator size="large" color="#6200ee" />
                 ) : showCheckmark ? (
+                    <View>
                     <LottieView
                         source={require('../assets/checkmark.json')}
                         autoPlay
                         loop={false}
                         style={{ width: 100, height: 100, alignSelf: 'center' }}
                     />
-                ) : (
+                    <Text category='s1' style={styles.heading}>Talking with AI amd making your quiz ready.</Text>
+                    </View>
+                    ) : (
                     <>
                         <Button mode="contained" onPress={handleGenerateQuiz} style={styles.button}>
                             Generate Quiz

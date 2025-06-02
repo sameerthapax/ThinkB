@@ -44,7 +44,7 @@ ${content}
         const response = await axios.post(
             'http://5.161.80.216:3000/generate',
             {
-                model: 'llama3.2:1b',
+                model: 'qwen2.5:3b',
                 prompt: prompt,
                 stream: false,
             },
