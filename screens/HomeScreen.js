@@ -186,7 +186,7 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.todayScoreInnerCard}>
                     <CircularProgressBar style={styles.todayScore} progress={todayScore / 10} size={"giant"} />
                     <View style={styles.todayScoreTextArea}>
-                        <Text style={styles.todayScoreText}>Total Quizes: {totalQuizToday}</Text>
+                        <Text style={styles.todayScoreText}>Total Quizzes: {totalQuizToday}</Text>
                         <Text style={styles.todayScoreText}>Score: {todayScore} / 10</Text>
                         <Text style={styles.todayScoreText}>Total Document: {todayTotalDocument}</Text>
                     </View>

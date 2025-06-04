@@ -5,6 +5,7 @@ import { Button, Text } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateQuizFromText } from '../utils/generateQuiz';
 import { parseQuizJson } from '../utils/parseQuiz';
+import { useInterstitialAd } from '../utils/showAds';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 
@@ -12,7 +13,7 @@ export default function ExtractedTextScreen() {
     const route = useRoute();
     const navigation = useNavigation();
     const { extractedText, fileName } = route.params;
-
+    const { showAd } = useInterstitialAd();
     const [loading, setLoading] = useState(false);
     const [showCheckmark, setShowCheckmark] = useState(false);
 
@@ -23,6 +24,8 @@ export default function ExtractedTextScreen() {
             const parsedSettings = settings
                 ? JSON.parse(settings)
                 : { quizLength: 10, difficulty: 'medium' };
+
+            showAd();
 
             const rawQuizText = await generateQuizFromText(extractedText, {
                 numberOfQuestions: parsedSettings.quizLength,
@@ -66,7 +69,11 @@ export default function ExtractedTextScreen() {
 
             <View style={styles.footer}>
                 {loading ? (
-                    <ActivityIndicator size="large" color="#6200ee" />
+                    <View>
+                        <ActivityIndicator size="large" color="#3366FF" />
+                        <Text category='s1' style={styles.subHeading1}>Talking with AI and making your quiz ready...</Text>
+                        <Text category='s1' style={styles.subHeading2}>This can take up to 3 mins.</Text>
+                    </View>
                 ) : showCheckmark ? (
                     <View>
                     <LottieView
@@ -75,7 +82,6 @@ export default function ExtractedTextScreen() {
                         loop={false}
                         style={{ width: 100, height: 100, alignSelf: 'center' }}
                     />
-                    <Text category='s1' style={styles.heading}>Talking with AI amd making your quiz ready.</Text>
                     </View>
                     ) : (
                     <>
@@ -101,6 +107,18 @@ const styles = StyleSheet.create({
     },
     heading: {
         fontSize: 20,
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    subHeading1: {
+        fontSize: 10,
+        marginBottom: 12,
+        fontWeight:'400',
+        textAlign: 'center',
+    },
+    subHeading2: {
+        fontSize: 8,
+        fontWeight:'200',
         marginBottom: 12,
         textAlign: 'center',
     },

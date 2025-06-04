@@ -16,7 +16,9 @@ import ExpoDocumentPicker
 import EASClient
 import ExpoFileSystem
 import ExpoFont
+import ExpoImage
 import ExpoKeepAwake
+import ExpoLinearGradient
 import EXNotifications
 import ExpoSystemUI
 import EXUpdates
@@ -42,7 +44,9 @@ public class ExpoModulesProvider: ModulesProvider {
       FileSystemNextModule.self,
       FontLoaderModule.self,
       FontUtilsModule.self,
+      ImageModule.self,
       KeepAwakeModule.self,
+      LinearGradientModule.self,
       BackgroundModule.self,
       BadgeModule.self,
       CategoriesModule.self,
@@ -77,7 +81,9 @@ public class ExpoModulesProvider: ModulesProvider {
       FileSystemNextModule.self,
       FontLoaderModule.self,
       FontUtilsModule.self,
+      ImageModule.self,
       KeepAwakeModule.self,
+      LinearGradientModule.self,
       BackgroundModule.self,
       BadgeModule.self,
       CategoriesModule.self,

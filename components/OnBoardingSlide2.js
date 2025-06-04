@@ -4,7 +4,7 @@ import LottieView from 'lottie-react-native';
 import { Text } from '@ui-kitten/components';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function OnBoardingSlide2(isActive) {
+export default function OnBoardingSlide2({ isActive } ) {
     const animationRef = useRef(null);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -13,10 +13,10 @@ export default function OnBoardingSlide2(isActive) {
             animationRef.current?.reset();
             animationRef.current?.play(300, 0);
         }
-        if(!isActive && !isMounted) {
+        if(!isActive && isMounted) {
             animationRef.current?.reset();
         }
-    }, [isActive]);
+    }, [isActive, isMounted]);
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>

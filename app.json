@@ -10,7 +10,19 @@
     "plugins": [
       "expo-notifications",
       "expo-background-task",
-      "expo-asset"
+      "expo-asset",
+      ["react-native-google-mobile-ads",
+      {
+        "iosAppId": "ca-app-pub-2904800020194076~8314706306"
+      }],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
     ],
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -20,7 +32,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sameerthapa.ThinkB",
-      "buildNumber": "2",
+      "buildNumber": "1.0.0",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": "processing"
@@ -47,5 +59,8 @@
         "projectId": "854fefc9-0d98-40aa-b3dd-e70b7bc3f30b"
       }
     }
+  },
+  "react-native-google-mobile-ads": {
+    "ios_app_id": "ca-app-pub-2904800020194076~8314706306"
   }
 }

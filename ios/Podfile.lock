@@ -286,7 +286,16 @@ PODS:
     - ExpoModulesCore
   - ExpoFont (13.3.1):
     - ExpoModulesCore
+  - ExpoImage (2.1.7):
+    - ExpoModulesCore
+    - libavif/libdav1d
+    - SDWebImage (~> 5.21.0)
+    - SDWebImageAVIFCoder (~> 0.11.0)
+    - SDWebImageSVGCoder (~> 1.7.0)
+    - SDWebImageWebPCoder (~> 0.14.6)
   - ExpoKeepAwake (14.1.4):
+    - ExpoModulesCore
+  - ExpoLinearGradient (14.1.4):
     - ExpoModulesCore
   - ExpoModulesCore (2.3.13):
     - DoubleConversion
@@ -355,9 +364,29 @@ PODS:
   - FBLazyVector (0.79.2)
   - fmt (11.0.2)
   - glog (0.3.5)
+  - Google-Mobile-Ads-SDK (12.4.0):
+    - GoogleUserMessagingPlatform (>= 1.1)
+  - GoogleUserMessagingPlatform (3.0.0)
   - hermes-engine (0.79.2):
     - hermes-engine/Pre-built (= 0.79.2)
   - hermes-engine/Pre-built (0.79.2)
+  - libavif/core (0.11.1)
+  - libavif/libdav1d (0.11.1):
+    - libavif/core
+    - libdav1d (>= 0.6.0)
+  - libdav1d (1.2.0)
+  - libwebp (1.5.0):
+    - libwebp/demux (= 1.5.0)
+    - libwebp/mux (= 1.5.0)
+    - libwebp/sharpyuv (= 1.5.0)
+    - libwebp/webp (= 1.5.0)
+  - libwebp/demux (1.5.0):
+    - libwebp/webp
+  - libwebp/mux (1.5.0):
+    - libwebp/demux
+  - libwebp/sharpyuv (1.5.0)
+  - libwebp/webp (1.5.0):
+    - libwebp/sharpyuv
   - lottie-ios (4.5.0)
   - lottie-react-native (7.2.2):
     - DoubleConversion
@@ -2227,6 +2256,32 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNGoogleMobileAds (15.3.1):
+    - DoubleConversion
+    - glog
+    - Google-Mobile-Ads-SDK (= 12.4.0)
+    - GoogleUserMessagingPlatform (= 3.0.0)
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNReanimated (3.17.5):
     - DoubleConversion
     - glog
@@ -2402,7 +2457,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSVG (15.2.0):
+  - RNSVG (15.12.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2425,9 +2480,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNSVG/common (= 15.2.0)
+    - RNSVG/common (= 15.12.0)
     - Yoga
-  - RNSVG/common (15.2.0):
+  - RNSVG/common (15.12.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2475,6 +2530,17 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - SDWebImage (5.21.0):
+    - SDWebImage/Core (= 5.21.0)
+  - SDWebImage/Core (5.21.0)
+  - SDWebImageAVIFCoder (0.11.0):
+    - libavif/core (>= 0.11.0)
+    - SDWebImage (~> 5.10)
+  - SDWebImageSVGCoder (1.7.0):
+    - SDWebImage/Core (~> 5.6)
+  - SDWebImageWebPCoder (0.14.6):
+    - libwebp (~> 1.0)
+    - SDWebImage/Core (~> 5.17)
   - SocketRocket (0.7.1)
   - UMAppLoader (5.1.3)
   - Yoga (0.0.0)
@@ -2499,7 +2565,9 @@ DEPENDENCIES:
   - ExpoDocumentPicker (from `../node_modules/expo-document-picker/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
+  - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
+  - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
@@ -2581,6 +2649,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
+  - RNGoogleMobileAds (from `../node_modules/react-native-google-mobile-ads`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -2590,8 +2659,17 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Google-Mobile-Ads-SDK
+    - GoogleUserMessagingPlatform
+    - libavif
+    - libdav1d
+    - libwebp
     - lottie-ios
     - ReachabilitySwift
+    - SDWebImage
+    - SDWebImageAVIFCoder
+    - SDWebImageSVGCoder
+    - SDWebImageWebPCoder
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -2633,8 +2711,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-file-system/ios"
   ExpoFont:
     :path: "../node_modules/expo-font/ios"
+  ExpoImage:
+    :path: "../node_modules/expo-image/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
+  ExpoLinearGradient:
+    :path: "../node_modules/expo-linear-gradient/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
   ExpoSystemUI:
@@ -2794,6 +2876,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNDateTimePicker:
     :path: "../node_modules/@react-native-community/datetimepicker"
+  RNGoogleMobileAds:
+    :path: "../node_modules/react-native-google-mobile-ads"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -2827,7 +2911,9 @@ SPEC CHECKSUMS:
   ExpoDocumentPicker: 5487ce33530198f4ecf724e650d390b2abe84c15
   ExpoFileSystem: c36eb8155eb2381c83dda7dc210e3eec332368b6
   ExpoFont: abbb91a911eb961652c2b0a22eef801860425ed6
+  ExpoImage: e7738bebc58cee17e93fa161f2444f9c343996f5
   ExpoKeepAwake: bf0811570c8da182bfb879169437d4de298376e7
+  ExpoLinearGradient: a3126d055dd021c1eb38a2cf28052ccbd1a2b3e2
   ExpoModulesCore: 5d37821c36f3781dcd0ea9a393800c90eaa6259d
   ExpoSystemUI: 82c970cf8495449698e7343b4f78a0d04bcec9ee
   EXStructuredHeaders: 32bec6771c2db18c4cd47cecae530d1d06cdf972
@@ -2838,7 +2924,12 @@ SPEC CHECKSUMS:
   FBLazyVector: 84b955f7b4da8b895faf5946f73748267347c975
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
+  Google-Mobile-Ads-SDK: db00a3836f288f94e52114f312b56fe066699d82
+  GoogleUserMessagingPlatform: f8d0cdad3ca835406755d0a69aa634f00e76d576
   hermes-engine: 314be5250afa5692b57b4dd1705959e1973a8ebe
+  libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
+  libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
+  libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   lottie-ios: a881093fab623c467d3bce374367755c272bdd59
   lottie-react-native: 8bc11e10576d1a3f77f4e0ae5b70503c5c890a09
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
@@ -2909,10 +3000,15 @@ SPEC CHECKSUMS:
   ReactCommon: 76d2dc87136d0a667678668b86f0fca0c16fdeb0
   RNCAsyncStorage: 39c42c1e478e1f5166d1db52b5055e090e85ad66
   RNDateTimePicker: 43ee3de2bc639bc0d9b77564961060a54dfc7111
+  RNGoogleMobileAds: 04ce4f86fd26b6ef95a28d8bf32dfe22aa3ac961
   RNReanimated: 2313402fe27fecb7237619e9c6fcee3177f08a65
   RNScreens: 5621e3ad5a329fbd16de683344ac5af4192b40d3
-  RNSVG: 3916e7a39ffc336d3a685dcd1f29e86dc45c961b
+  RNSVG: 8a1054afe490b5d63b9792d7ae3c1fde8c05cdd0
   RNVectorIcons: 941a39b5d3b9d8cf8ac2e2fc09b07bfafbcf9796
+  SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
+  SDWebImageAVIFCoder: 00310d246aab3232ce77f1d8f0076f8c4b021d90
+  SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
+  SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   UMAppLoader: 55159b69750129faa7a51c493cb8ea55a7b64eb9
   Yoga: c758bfb934100bb4bf9cbaccb52557cee35e8bdf

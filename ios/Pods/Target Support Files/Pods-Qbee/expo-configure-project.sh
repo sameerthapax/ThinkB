@@ -45,7 +45,7 @@ with_node \
   --no-warnings \
   --eval "require(require.resolve('expo-modules-autolinking', { paths: [require.resolve('expo/package.json')] }))(process.argv.slice(1))" \
   generate-modules-provider  \
-  --target "/Users/sams/Qbee/ios/Pods/Target Support Files/Pods-Qbee/ExpoModulesProvider.swift" \
-  --entitlement "/Users/sams/Qbee/ios/Qbee/Qbee.entitlements" \
+  --target "/Users/sams/ThinkB/ios/Pods/Target Support Files/Pods-Qbee/ExpoModulesProvider.swift" \
+  --entitlement "/Users/sams/ThinkB/ios/Qbee/Qbee.entitlements" \
   --platform "apple" \
-  --packages "expo" "expo-application" "expo-asset" "expo-background-task" "expo-constants" "expo-dev-launcher" "expo-dev-menu" "expo-device" "expo-document-picker" "expo-eas-client" "expo-file-system" "expo-font" "expo-keep-awake" "expo-notifications" "expo-system-ui" "expo-updates"
+  --packages "expo" "expo-application" "expo-asset" "expo-background-task" "expo-constants" "expo-dev-launcher" "expo-dev-menu" "expo-device" "expo-document-picker" "expo-eas-client" "expo-file-system" "expo-font" "expo-image" "expo-keep-awake" "expo-linear-gradient" "expo-notifications" "expo-system-ui" "expo-updates"
