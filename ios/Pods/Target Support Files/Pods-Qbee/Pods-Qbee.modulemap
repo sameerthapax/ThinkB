@@ -1,6 +1,0 @@
-module Pods_Qbee {
-  umbrella header "Pods-Qbee-umbrella.h"
-
-  export *
-  module * { export * }
-}

@@ -1,6 +1,0 @@
-module ExpoBackgroundTask {
-  umbrella header "ExpoBackgroundTask-umbrella.h"
-
-  export *
-  module * { export * }
-}
