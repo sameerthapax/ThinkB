@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, Alert } from 'react-native';
 import { Layout, Text, Button } from '@ui-kitten/components';
 import * as DocumentPicker from 'expo-document-picker';
 import { useNavigation } from '@react-navigation/native';
@@ -18,17 +18,18 @@ export default function UploadScreen() {
 
     const handleUpload = async () => {
         try {
-            setLoading(true);
-
             const result = await DocumentPicker.getDocumentAsync({
                 type: 'application/pdf',
                 copyToCacheDirectory: false,
             });
 
-            if (result.canceled) {
-                setLoading(false);
+            if (result.canceled || !result.assets || result.assets.length === 0) {
+                Alert.alert('Cancelled', 'You cancelled the file selection.');
                 return;
             }
+
+            setLoading(true);
+            await showAd();
 
             const file = result.assets[0];
             const fileUri = file.uri;
@@ -36,18 +37,21 @@ export default function UploadScreen() {
             const base64 = await FileSystem.readAsStringAsync(fileUri, {
                 encoding: FileSystem.EncodingType.Base64,
             });
-            await showAd();
+
             setPdfBase64(base64);
         } catch (error) {
             console.error('❌ Error uploading PDF:', error);
-            setLoading(false);
+            Alert.alert('Error', 'Something went wrong during upload.');
         }
     };
 
     const handleMessage = (event) => {
-        const extractedText = event.nativeEvent.data;
-        if (!extractedText) {
+        const extractedText = event.nativeEvent.data?.trim();
+
+        if (!extractedText || extractedText === '') {
+            setPdfBase64(null);
             setLoading(false);
+            Alert.alert('Extraction Failed', 'Could not extract text from PDF. Please try another file.');
             return;
         }
 
@@ -55,12 +59,14 @@ export default function UploadScreen() {
         setTimeout(() => {
             setLoading(false);
             setDone(false);
+            setPdfBase64(null);
             navigation.navigate('ExtractedText', {
                 extractedText,
                 fileName: 'Extracted PDF',
             });
         }, 1500);
     };
+
     const goToHistory = () => {
         navigation.navigate('Materials');
     };
@@ -76,10 +82,9 @@ export default function UploadScreen() {
                 View Upload History
             </Button>
 
-
             {loading && !done && (
                 <View>
-                <ActivityIndicator size="large" color="#3366FF" />
+                    <ActivityIndicator size="large" color="#3366FF" />
                     <Text category='s1' style={styles.heading}>Parsing your data... This might take some time.</Text>
                 </View>
             )}
@@ -101,11 +106,17 @@ export default function UploadScreen() {
                     source={require('../assets/pdfviewer.html')}
                     originWhitelist={['*']}
                     onMessage={handleMessage}
+                    onError={(e) => {
+                        console.error('❌ WebView error:', e.nativeEvent);
+                        setLoading(false);
+                        setPdfBase64(null);
+                        Alert.alert('Error', 'WebView failed to load. Try again.');
+                    }}
                     onLoad={() => {
                         const js = `window.loadPdfFromBase64("${pdfBase64}"); true;`;
-                        webviewRef.current.injectJavaScript(js);
+                        webviewRef.current?.injectJavaScript(js);
                     }}
-                    style={{ height: 0, width: 0 }} // hide WebView
+                    style={{ height: 0, width: 0 }}
                 />
             )}
         </Layout>

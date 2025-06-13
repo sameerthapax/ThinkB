@@ -9,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import {SafeAreaView} from "react-native-safe-area-context";
 
+
 export default function QuizScreen() {
     const route = useRoute();
     const navigation = useNavigation();
@@ -56,7 +57,8 @@ export default function QuizScreen() {
         if (finished && !isReview) {
             const saveHistory = async () => {
                 const today = new Date().toISOString().split('T')[0];
-                const todayTimeLocal = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });                const historyItem = {
+                const todayTimeLocal = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+                const historyItem = {
                     date: today,
                     time: todayTimeLocal,
                     score,
@@ -69,38 +71,6 @@ export default function QuizScreen() {
                 await AsyncStorage.setItem('quiz-history', JSON.stringify(history));
             };
 
-            const updateStreak = async () => {
-                const getLocalDate = (offsetDays = 0) => {
-                    const d = new Date();
-                    d.setDate(d.getDate() + offsetDays);
-                    return d.toLocaleDateString('en-CA'); // format: YYYY-MM-DD
-                };
-
-                const today = getLocalDate();
-                const yesterday = getLocalDate(-1);
-                const stored = await AsyncStorage.getItem('quiz-streak');
-                const streakData = stored ? JSON.parse(stored) : { lastDate: null, streak: 0 };
-
-                let newStreak = 0;
-
-                if (streakData.lastDate === yesterday) {
-                    newStreak = streakData.streak + 1;
-                }
-                else if (streakData.lastDate === today) {
-                    newStreak = streakData.streak; // No change if already done today
-                } else if (streakData.lastDate === null || streakData.lastDate < yesterday) {
-                    newStreak = 0; // First quiz of the streak
-                } else {
-                    newStreak = 0; // Explicit reset if user missed a day
-                }
-
-
-                await AsyncStorage.setItem('quiz-streak', JSON.stringify({
-                    lastDate: today,
-                    streak: newStreak,
-                }));
-            };
-
 
             Animated.timing(fadeAnim, {
                 toValue: 1,
@@ -109,7 +79,6 @@ export default function QuizScreen() {
             }).start();
 
             saveHistory();
-            updateStreak();
         }
         if (finished && isReview) {
             Animated.timing(fadeAnim, {
@@ -125,7 +94,7 @@ export default function QuizScreen() {
             onPress={() => navigation.navigate('QuizBuilderStart')}
             style={{ marginRight: 16 }}
         >
-            <Text style={{ color: '#007aff', fontSize: 16 }}>Create</Text>
+            <Text style={{ color: '#7c3aed', fontSize: 16 }}>Create</Text>
         </TouchableOpacity>
     )};
     React.useLayoutEffect(() => {

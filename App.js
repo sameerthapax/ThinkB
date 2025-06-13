@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Platform } from 'react-native';
 import * as eva from '@eva-design/eva';
 import { ApplicationProvider, IconRegistry, Icon } from '@ui-kitten/components';
 import { EvaIconsPack, TopNavigationAction} from '@ui-kitten/eva-icons';
@@ -7,6 +7,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CurvedBottomBar } from 'react-native-curved-bottom-bar';
+import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
+import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -20,7 +23,14 @@ import OnboardingScreen from './screens/OnboardingScreen';
 import QuizBuilderScreenStart from './screens/QuizBuilderScreenStart';
 import QuizBuilderScreenCreate from './screens/QuizBuilderScreenCreate';
 import QuizBuilderScreenPreview from './screens/QuizBuilderPreviewScreen';
+import PaywallScreen from './screens/OfferingScreen';
+import PaywallScreenPremium from './screens/OfferingScreenPremium';
 import MyQuizScreen from './screens/MyQuizScreen';
+
+
+//utils
+import { checkStreak } from './utils/streakManager';
+import { initializeAppStorage } from './utils/initializeAppStorage';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,23 +38,26 @@ const Stack = createNativeStackNavigator();
 const TabNavigator = () => (
     <CurvedBottomBar.Navigator
         style={styles.bottomBar}
-        height={80}
-        circleWidth={65}
+        height={85}
+        circleWidth={70}
         bgColor="rgba(0,0,0,1)"
         initialRouteName="Home"
-        borderWidth={1}
-        borderColor="white"
         borderTopLeftRight
-        renderCircle={({ navigate }) => (
-            <View style={styles.circleButton}>
+        renderCircle={({ navigate, selectedTab, routeName }) => {
+            const isSelected = routeName === selectedTab;
+            const size= isSelected?40:30
+            return(
+            <View style={isSelected? styles.circleButtonSelected : styles.circleButton}>
                 <Icon
                     name="file-add"
-                    fill="#fff"
-                    style={{ width: 30, height: 30 }}
-                    onPress={() => navigate('Upload')}
+                    fill={isSelected ? 'rgb(0,0,0)' : '#ffffff'}
+                    style={{ width: size, height: size }}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Hard);
+                        navigate('Upload')}}
                 />
             </View>
-        )}
+        )}}
         tabBar={({ routeName, selectedTab, navigate }) => {
             const icons = {
                 Home: 'home',
@@ -52,12 +65,19 @@ const TabNavigator = () => (
                 History: 'clock',
                 Settings: 'settings',
             };
+            const isSelected = routeName === selectedTab;
+            const size = isSelected ? 44 : 38; // selected icon is larger
             return (
                 <Icon
                     name={icons[routeName]}
-                    fill={routeName === selectedTab ? '#7c3aed' : 'rgb(255,255,255)'}
-                    style={{ width: 34, height: 34, marginLeft: '50%', left: '-25%' }}
-                    onPress={() => navigate(routeName)}
+                    fill={isSelected ? '#7c3aed' : 'rgb(255,255,255)'}
+                    style={{
+                        width: size, height: size, marginLeft: '50%', left: '-25%', marginBottom: 10
+                    }}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigate(routeName)
+                    }}
                 />
             );
         }}
@@ -74,11 +94,35 @@ export default function App() {
     const [initialRoute, setInitialRoute] = useState(null);
 
     useEffect(() => {
+        Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+        if (Platform.OS === 'ios'){
+            Purchases.configure({apiKey: 'appl_KbqCFBlFhDbkCzEcVhzVzaCtkJK'});
+        }
+        Purchases.getOfferings().then( (offerings) => {
+            if (offerings.current !== null) {
+                console.log(offerings.all['PremiumMember']);
+            } else {
+                console.log('No offerings available');
+            }}).catch((error) => {
+            console.error('Error loading offerings:', error);
+        })
+        }, []);
+
+    useEffect(() => {
         const checkFirstLaunch = async () => {
             const value = await AsyncStorage.getItem('hasSeenOnboarding');
-            setInitialRoute(value === 'true' ? 'ThinkB' : 'Onboarding');
+            if (value === null) {
+                // First launch, show onboarding
+                await initializeAppStorage(); // Set all default values
+                setInitialRoute('Onboarding');
+                await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+            } else {
+                // Not first launch, show main app
+                setInitialRoute('ThinkB');
+            }
         };
         checkFirstLaunch();
+        checkStreak();
     }, []);
 
     if (!initialRoute) return null; // or a splash screen
@@ -97,6 +141,8 @@ export default function App() {
                         <Stack.Screen name="QuizBuilderCreate" component={QuizBuilderScreenCreate} options={{ headerShown: true, title: 'Quiz Builder'}} />
                         <Stack.Screen name="QuizBuilderPreview" component={QuizBuilderScreenPreview} options={{ headerShown: true, title: 'Quiz Builder'}} />
                         <Stack.Screen name="MyQuizzes" component={MyQuizScreen} options={{ headerShown: true, title: 'Quiz Builder'}} />
+                        <Stack.Screen name="AdvancedOffering" component={PaywallScreen} options={{ headerShown: false}} />
+                        <Stack.Screen name="PremiumOffering" component={PaywallScreenPremium} options={{ headerShown: false}} />
                     </Stack.Navigator>
                 </NavigationContainer>
             </ApplicationProvider>
@@ -115,7 +161,7 @@ const styles = StyleSheet.create({
     circleButton: {
         width: 65,
         height: 65,
-        borderRadius: 32.5,
+        borderRadius:"50%",
         backgroundColor: '#7c3aed',
         alignItems: 'center',
         justifyContent: 'center',
@@ -124,5 +170,18 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowOffset: { width: 0, height: 5 },
+    },
+    circleButtonSelected: {
+        width: 72,
+        height: 72,
+        borderRadius: "50%",
+        backgroundColor: '#7c3aed',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bottom: 35,
+        shadowColor: 'rgba(0,0,0,0.74)',
+        shadowColor: '#000',
+        shadowOpacity: 0.7,
+        shadowOffset: { width: 0, height: 10 },
     },
 });

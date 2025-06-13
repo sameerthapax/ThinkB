@@ -1,5 +1,4 @@
-// ExtractedTextScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,23 +13,48 @@ export default function ExtractedTextScreen() {
     const navigation = useNavigation();
     const { extractedText, fileName } = route.params;
     const { showAd } = useInterstitialAd();
+
     const [loading, setLoading] = useState(false);
     const [showCheckmark, setShowCheckmark] = useState(false);
+    const abortControllerRef = useRef(new AbortController());
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', () => {
+            if (loading) {
+                console.log('🛑 Navigation event detected, aborting...');
+                abortControllerRef.current.abort();
+            }
+        });
+
+        return unsubscribe;
+    }, [navigation, loading]);
 
     const handleGenerateQuiz = async () => {
+        abortControllerRef.current = new AbortController();
+
         try {
             setLoading(true);
             const settings = await AsyncStorage.getItem('quiz-settings');
             const parsedSettings = settings
                 ? JSON.parse(settings)
-                : { quizLength: 10, difficulty: 'medium' };
+                : { quizLength: 5, difficulty: 'easy' };
 
-            showAd();
+            await showAd();
 
-            const rawQuizText = await generateQuizFromText(extractedText, {
-                numberOfQuestions: parsedSettings.quizLength,
-                difficulty: parsedSettings.difficulty,
-            });
+            const rawQuizText = await generateQuizFromText(
+                extractedText,
+                {
+                    numberOfQuestions: parsedSettings.quizLength,
+                    difficulty: parsedSettings.difficulty,
+                    generationMode: 'Manual'
+                },
+                abortControllerRef.current.signal
+            );
+
+            if (!rawQuizText) {
+                setLoading(false);
+                return;
+            }
 
             const parsedQuiz = parseQuizJson(rawQuizText);
             const todayKey = `quiz-${new Date().toISOString().split('T')[0]}`;
@@ -48,18 +72,23 @@ export default function ExtractedTextScreen() {
             materialList.push(materialEntry);
             await AsyncStorage.setItem('study-materials', JSON.stringify(materialList));
 
-            setLoading(false);
             setShowCheckmark(true);
-
             setTimeout(() => {
-                navigation.navigate('ThinkB',{screen: 'Quiz' , params: { Quiz: parsedQuiz } });
+                navigation.navigate('ThinkB', {
+                    screen: 'Quiz',
+                    params: { Quiz: parsedQuiz },
+                });
             }, 1500);
         } catch (error) {
-            console.error(error);
+            if (error.name === 'AbortError') {
+                console.log('🛑 Quiz generation aborted by user');
+            } else {
+                console.error('❌ Quiz generation failed:', error);
+            }
+        } finally {
             setLoading(false);
         }
     };
-
 
     return (
         <View style={styles.container}>
@@ -71,19 +100,19 @@ export default function ExtractedTextScreen() {
                 {loading ? (
                     <View>
                         <ActivityIndicator size="large" color="#3366FF" />
-                        <Text category='s1' style={styles.subHeading1}>Talking with AI and making your quiz ready...</Text>
-                        <Text category='s1' style={styles.subHeading2}>This can take up to 3 mins.</Text>
+                        <Text style={styles.subHeading1}>Talking with AI and making your quiz ready...</Text>
+                        <Text style={styles.subHeading2}>This can take up to 3 mins.</Text>
                     </View>
                 ) : showCheckmark ? (
                     <View>
-                    <LottieView
-                        source={require('../assets/checkmark.json')}
-                        autoPlay
-                        loop={false}
-                        style={{ width: 100, height: 100, alignSelf: 'center' }}
-                    />
+                        <LottieView
+                            source={require('../assets/checkmark.json')}
+                            autoPlay
+                            loop={false}
+                            style={{ width: 100, height: 100, alignSelf: 'center' }}
+                        />
                     </View>
-                    ) : (
+                ) : (
                     <>
                         <Button mode="contained" onPress={handleGenerateQuiz} style={styles.button}>
                             Generate Quiz
@@ -105,20 +134,15 @@ const styles = StyleSheet.create({
         paddingTop: 20,
         backgroundColor: '#fff',
     },
-    heading: {
-        fontSize: 20,
-        marginBottom: 12,
-        textAlign: 'center',
-    },
     subHeading1: {
         fontSize: 10,
         marginBottom: 12,
-        fontWeight:'400',
+        fontWeight: '400',
         textAlign: 'center',
     },
     subHeading2: {
         fontSize: 8,
-        fontWeight:'200',
+        fontWeight: '200',
         marginBottom: 12,
         textAlign: 'center',
     },

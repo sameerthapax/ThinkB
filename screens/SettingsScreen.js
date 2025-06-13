@@ -1,22 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Platform, Alert } from 'react-native';
-import { Text, Title, Switch, Button, SegmentedButtons } from 'react-native-paper';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, Platform, Alert, Linking, Pressable } from 'react-native';
+import { Title, Switch, SegmentedButtons } from 'react-native-paper';
 import Slider from '@react-native-community/slider';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Text, Button, Icon } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import {getAllScheduledNotificationsAsync} from "expo-notifications";
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import Purchases from 'react-native-purchases';
+
+
 
 export default function SettingsScreen() {
-    const [quizLength, setQuizLength] = useState(10);
+    const navigation = useNavigation();
+    const [quizLength, setQuizLength] = useState(5);
     const [reminderEnabled, setReminderEnabled] = useState(false);
     const [reminderTime, setReminderTime] = useState(new Date(new Date().setHours(18, 0, 0)));
     const [showTimePicker, setShowTimePicker] = useState(false);
-    const [difficulty, setDifficulty] = useState('medium');
+    const [difficulty, setDifficulty] = useState('easy');
     const [settingsLoaded, setSettingsLoaded] = useState(false);
+    const [isPro, setPro] = useState(false);
+    const [isAdv, setAdv] = useState(false);
 
-    useEffect(() => {
-        (async () => {
+    useFocusEffect(useCallback(() => {
+        const checkStoredSettings = async () => {
+            try{
             const stored = await AsyncStorage.getItem('quiz-settings');
             if (stored) {
                 const settings = JSON.parse(stored);
@@ -24,13 +33,45 @@ export default function SettingsScreen() {
                 setReminderEnabled(settings.reminderEnabled);
                 setReminderTime(new Date(settings.reminderTime));
                 setDifficulty(settings.difficulty);
+                setSettingsLoaded(true);
+            }} catch (error) {
+                console.error('❌ Error loading settings from AsyncStorage:', error);
             }
-            setSettingsLoaded(true);
-        })();
-    }, []);
+        };
+        checkStoredSettings();
+
+    }, []));
+    useFocusEffect(useCallback(() => {
+        const checkIfProUser = async () => {
+            try {
+                const customerInfo = await Purchases.getCustomerInfo();
+
+                if (customerInfo.entitlements.active['PremiumUser']) {
+                    console.log('✅ User is Pro.');
+                    setPro(true);
+                    console.log(customerInfo.entitlements.active);
+                }else if(customerInfo.entitlements.active['AdvancedUser']) {
+                    console.log('✅ User is Advanced.');
+                    setAdv(true);
+                    console.log(customerInfo.entitlements.active);
+
+                } else {
+                    console.log('❌ User is not Pro or Advanced.');
+                    setPro(false);
+                    setAdv(false);
+                }
+            } catch (error) {
+                console.error('Error fetching customer info:', error);
+                return false;
+            }
+        };
+        checkIfProUser();
+    }, [isPro, isAdv]));
 
     useEffect(() => {
-        if (!settingsLoaded) return;
+        if (!settingsLoaded) {
+            return;
+        };
         const saveSettings = async () => {
             const settings = {
                 quizLength,
@@ -68,6 +109,7 @@ export default function SettingsScreen() {
             setReminderTime(updatedTime);
         }
     };
+
 
     const scheduleDailyReminder = async (time) => {
         try {
@@ -123,28 +165,36 @@ export default function SettingsScreen() {
         <View style={styles.container}>
             <Title style={styles.title}>Quiz Settings</Title>
 
-            <Text style={styles.label}>Number of Questions: {quizLength}</Text>
+            {!isPro ? (<View style={styles.titleLine}><Icon name="lock" style={styles.icon} fill="#673AB7" /><Text style={styles.labelLocked}>Number of Questions: {quizLength}</Text></View>):(<Text style={styles.label}>Number of Questions: {quizLength}</Text>)}
             <Slider
                 style={{ width: '100%', height: 40 }}
                 minimumValue={5}
-                maximumValue={20}
+                maximumValue={15}
                 step={5}
                 value={quizLength}
-                onValueChange={setQuizLength}
+                disabled={isPro}
+                onSlidingComplete={setQuizLength}
                 minimumTrackTintColor="#6200ee"
                 maximumTrackTintColor="#ddd"
             />
 
-            <Text style={styles.label}>Difficulty</Text>
+            {!isAdv ? (<View style={styles.titleLine}><Icon name="lock" style={styles.icon} fill="#673AB7" /><Text style={styles.labelLocked}>Difficulty:</Text></View>):(<Text style={styles.label}>Difficulty:</Text>)}
             <SegmentedButtons
                 value={difficulty}
-                onValueChange={setDifficulty}
+                onValueChange={(value) => {
+                    console.log('📊 Difficulty changed to', value);
+                    setDifficulty(value);
+                }}
                 buttons={[
                     { value: 'easy', label: 'Easy' },
                     { value: 'medium', label: 'Medium' },
                     { value: 'hard', label: 'Hard' },
                 ]}
-             multiSelect/>
+                style={{
+                    opacity: isAdv ? 1 : 0.4,
+                    pointerEvents: isAdv ? 'auto' : 'none',
+                }}
+            />
 
             <View style={styles.settingRow}>
                 <Text style={styles.label}>Enable Reminder</Text>
@@ -168,7 +218,63 @@ export default function SettingsScreen() {
                     onChange={onTimeSelected}
                 />
             )}
+            {!showTimePicker && (
+            <View style={styles.proCard}>
+                <Title style={styles.title}>🚀 Be Pro</Title>
+                <Text style={{ marginBottom: 10 }}>
+                    Unlock faster quizzes, remove ads, and boost your learning experience.
+                </Text>
+                { isAdv || isPro ? (
+                <Button
+                    mode="contained"
+                    icon="lock"
+                    style={styles.proButtonAfter}
+                    onPress={() => {
+                        Alert.alert('You are already an Advanced user!', 'Thank you for your support!'); // Alert if already Advanced
+                    }}
+                >
+                    You are an Advanced user!
+                </Button>
+                ) : (
+                <Button
+                    mode="contained"
+                    icon="rocket"
+                    style={styles.proButton}
+                    onPress={() => {
+                        navigation.navigate('AdvancedOffering'); // Navigate to the paywall screen
+                    }}>
+                    Upgrade to Advanced Member
+                </Button>
+                )}
+                { isPro ?(
+                <Button
+                    mode="contained"
+                    icon="lock"
+                    style={styles.proButtonAfter}
+                    onPress={() => {
+                        Alert.alert('You are already a Pro user!', 'Thank you for your support!'); // Alert if already Pro
 
+                    }}
+                >
+                    You are a Pro user!
+                </Button>
+                    ):(
+                        <Button
+                            mode="contained"
+                            icon="star"
+                            style={styles.proButton}
+                            onPress={() => {
+                                navigation.navigate('PremiumOffering'); // Navigate to the paywall screen
+                            }}>
+                            Upgrade to Premium
+                        </Button>
+
+                    )}
+                <Pressable onPress={() => Linking.openURL('https://sameerthapa.dev')}>
+                <Text style={styles.cancelLink}>Cancel</Text>
+                </Pressable>
+            </View>
+            )}
         </View>
 
     );
@@ -187,12 +293,51 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 16,
-        marginBottom: 10,
+        marginBottom: 5,
+    },
+    labelLocked: {
+        fontSize: 16,
+        color: '#8d8d8d',
+
     },
     settingRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginVertical: 15,
+    },
+    proButton: {
+        marginTop: 10,
+        backgroundColor: '#673AB7',
+    },proButtonAfter: {
+        marginTop: 10,
+        backgroundColor: 'black',
+    },
+    titleLine: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    icon: {
+        width: 18,
+        height: 18,
+    },
+    proCard: {
+        marginTop: 20,
+        padding: 15,
+        borderRadius: 10,
+        backgroundColor: '#f5f5f5',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    cancelLink: {
+        color: '#7c3aed',
+        textAlign: 'center',
+        textDecorationLine: 'underline',
+        marginTop: 10,
+        fontSize: 16,
     },
 });

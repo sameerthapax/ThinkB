@@ -34,7 +34,7 @@ export default function HistoryScreen() {
             onPress={() => navigation.navigate('MyQuizzes')}
             style={{ marginRight: 16 }}
         >
-            <Text style={{ color: '#007aff', fontSize: 16 }}>My Quizzes</Text>
+            <Text style={{ color: '#7c3aed', fontSize: 16 }}>My Quizzes</Text>
         </TouchableOpacity>
     );
     React.useLayoutEffect(() => {

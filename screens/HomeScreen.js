@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import * as Notifications from "expo-notifications";
+import { checkStreak } from '../utils/streakManager';
 
 const checkScheduledNotifications = async () => {
     try {
@@ -26,9 +27,9 @@ const checkScheduledNotifications = async () => {
 };
 const logAsyncStorage = async () => {
     try {
-        const keys = await AsyncStorage.getAllKeys();
-        const stores = await AsyncStorage.multiGet(keys);
-        console.log('📦 AsyncStorage Contents:', stores);
+        const keys = await AsyncStorage.getItem('quiz-settings');
+        // const stores = await AsyncStorage.multiGet(keys);
+        console.log('📦 AsyncStorage Contents:', keys);
     } catch (e) {
         console.error('❌ Error reading AsyncStorage:', e);
     }
@@ -69,7 +70,7 @@ export default function HomeScreen({ navigation }) {
 
         return () => clearInterval(interval);
     }, []));
-    const InfoIcon = (props) => <Icon {...props} name="arrow-circle-up" />;
+    const InfoIcon = (props) => <Icon {...props} name="arrow-circle-up" fill={'#7c3aed'} />;
     const renderRightActions = (navigation) => (
         <TopNavigationAction
             icon={InfoIcon}
@@ -88,6 +89,7 @@ export default function HomeScreen({ navigation }) {
     useFocusEffect(
         useCallback(() => {
             const loadStreakAndScore = async () => {
+                await checkStreak();
                 const storedStreak = await AsyncStorage.getItem('quiz-streak');
                 const streakData = storedStreak ? JSON.parse(storedStreak) : { streak: 0 };
                 setStreak(streakData.streak);
@@ -108,7 +110,7 @@ export default function HomeScreen({ navigation }) {
                         new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`)
                     );
 
-                    setTodayScore(sorted[0].score); // 🟢 set score from the first quiz of today
+                    setTodayScore(sorted[0].score);
 
                 } else {
                     setTodayScore(0); // No quiz today yet
@@ -127,6 +129,7 @@ export default function HomeScreen({ navigation }) {
         <Layout style={styles.container}>
             <View style={styles.scrollContent}>
             <View style={styles.streakCard}>
+
                 <Text appearance='hint' style={styles.streakLabel}>Streaks</Text>
                 <View style={styles.streakRow}>
                     <Text style={styles.streakNumber}>{streak}</Text>
@@ -202,7 +205,7 @@ export default function HomeScreen({ navigation }) {
             {/*    >*/}
             {/*        {evaProps => <Text {...evaProps} style={styles.menuButtonText}>Test Notification scheduel</Text>}*/}
             {/*    </Button>*/}
-            {/*    <Button onPress={logAsyncStorage}>Log AsyncStorage</Button>*/}
+                <Button onPress={logAsyncStorage}>Log AsyncStorage</Button>
 
 
             {/*</View>*/}
