@@ -12,6 +12,7 @@ export const initializeAppStorage = async () => {
             'quiz-streak': JSON.stringify({
                 streak: 0,
                 lastDate: null,
+                streakStartDate: null,
             }),
             'quiz-history': JSON.stringify([]),
             'study-materials': JSON.stringify([]),

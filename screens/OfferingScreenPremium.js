@@ -33,6 +33,11 @@ export default function PaywallScreenPremium() {
                     navigation.goBack();
                     alert('Purchase cancelled. Please try again later.')}
                 }
+                onPurchaseCompleted={async(purchase) => {
+                    console.log('Purchase completed:', purchase);
+                    await refresh();
+                    navigation.goBack();
+                }}
 
             />
         </View>

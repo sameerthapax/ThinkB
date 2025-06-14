@@ -7,7 +7,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import * as Notifications from "expo-notifications";
-import { checkStreak } from '../utils/streakManager';
+import Purchases from 'react-native-purchases';
+import { runBackgroundQuizGeneration } from '../utils/backgroundTask';
+import { parseQuizJson } from '../utils/parseQuiz';
+
+
 
 const checkScheduledNotifications = async () => {
     try {
@@ -27,7 +31,7 @@ const checkScheduledNotifications = async () => {
 };
 const logAsyncStorage = async () => {
     try {
-        const keys = await AsyncStorage.getItem('quiz-settings');
+        const keys = await AsyncStorage.getItem('quizAT-2025-06-14');
         // const stores = await AsyncStorage.multiGet(keys);
         console.log('📦 AsyncStorage Contents:', keys);
     } catch (e) {
@@ -48,7 +52,30 @@ export default function HomeScreen({ navigation }) {
 
 
 
+    const handleTestBackground = async () => {
+        await runBackgroundQuizGeneration();
+    };
+    useEffect(() => {
+        const checkAndNavigateToQuiz = async () => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const quizKey = `quizAG-${todayStr}`;
+            const existing = await AsyncStorage.getItem(quizKey);
+            const autoQuizShown = await AsyncStorage.getItem('autoQuizShown');
 
+
+            if (existing && autoQuizShown !== 'true') {
+                setTimeout(() => {
+                    AsyncStorage.setItem('autoQuizShown', 'true');
+                    navigation.navigate('ThinkB', {
+                        screen: 'Quiz',
+                        params: { Quiz: JSON.parse(existing) },
+                    });
+                }, 2000);
+            }
+        };
+
+        checkAndNavigateToQuiz();
+    }, []);
 
     useFocusEffect(useCallback(() => {
         Object.values(badgeRefs.current).forEach(ref => {
@@ -89,7 +116,6 @@ export default function HomeScreen({ navigation }) {
     useFocusEffect(
         useCallback(() => {
             const loadStreakAndScore = async () => {
-                await checkStreak();
                 const storedStreak = await AsyncStorage.getItem('quiz-streak');
                 const streakData = storedStreak ? JSON.parse(storedStreak) : { streak: 0 };
                 setStreak(streakData.streak);
@@ -205,7 +231,8 @@ export default function HomeScreen({ navigation }) {
             {/*    >*/}
             {/*        {evaProps => <Text {...evaProps} style={styles.menuButtonText}>Test Notification scheduel</Text>}*/}
             {/*    </Button>*/}
-                <Button onPress={logAsyncStorage}>Log AsyncStorage</Button>
+            {/*    <Button onPress={logAsyncStorage}>Log AsyncStorage</Button>*/}
+                <Button onPress={handleTestBackground}>test background app</Button>
 
 
             {/*</View>*/}
@@ -256,12 +283,12 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     fire: {
-        width: 140,
-        height: 140,
+        width: 120,
+        height: 120,
         marginTop: 10,
     },
     streakNumber: {
-        fontSize: 150,
+        fontSize: 130,
         fontWeight: 'bold',
         color: '#000',
     },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { View, StyleSheet, Platform, Alert, Linking, Pressable } from 'react-native';
 import { Title, Switch, SegmentedButtons } from 'react-native-paper';
 import Slider from '@react-native-community/slider';
@@ -6,79 +6,47 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Text, Button, Icon } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import {getAllScheduledNotificationsAsync} from "expo-notifications";
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import Purchases from 'react-native-purchases';
+import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { getAllScheduledNotificationsAsync } from 'expo-notifications';
 
-
+import { SubscriptionContext } from '../context/SubscriptionContext';
 
 export default function SettingsScreen() {
     const navigation = useNavigation();
+    const { isProUser, isAdvancedUser, refresh} = useContext(SubscriptionContext);
+
     const [quizLength, setQuizLength] = useState(5);
     const [reminderEnabled, setReminderEnabled] = useState(false);
     const [reminderTime, setReminderTime] = useState(new Date(new Date().setHours(18, 0, 0)));
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [difficulty, setDifficulty] = useState('easy');
     const [settingsLoaded, setSettingsLoaded] = useState(false);
-    const [isPro, setPro] = useState(false);
-    const [isAdv, setAdv] = useState(false);
 
-    useFocusEffect(useCallback(() => {
-        const checkStoredSettings = async () => {
-            try{
-            const stored = await AsyncStorage.getItem('quiz-settings');
-            if (stored) {
-                const settings = JSON.parse(stored);
-                setQuizLength(settings.quizLength);
-                setReminderEnabled(settings.reminderEnabled);
-                setReminderTime(new Date(settings.reminderTime));
-                setDifficulty(settings.difficulty);
-                setSettingsLoaded(true);
-            }} catch (error) {
-                console.error('❌ Error loading settings from AsyncStorage:', error);
-            }
-        };
-        checkStoredSettings();
-
-    }, []));
-    useFocusEffect(useCallback(() => {
-        const checkIfProUser = async () => {
-            try {
-                const customerInfo = await Purchases.getCustomerInfo();
-
-                if (customerInfo.entitlements.active['PremiumUser']) {
-                    console.log('✅ User is Pro.');
-                    setPro(true);
-                    console.log(customerInfo.entitlements.active);
-                }else if(customerInfo.entitlements.active['AdvancedUser']) {
-                    console.log('✅ User is Advanced.');
-                    setAdv(true);
-                    console.log(customerInfo.entitlements.active);
-
-                } else {
-                    console.log('❌ User is not Pro or Advanced.');
-                    setPro(false);
-                    setAdv(false);
-                }
-            } catch (error) {
-                console.error('Error fetching customer info:', error);
-                return false;
-            }
-        };
-        checkIfProUser();
-    }, [isPro, isAdv]));
 
     useEffect(() => {
-        if (!settingsLoaded) {
-            return;
-        };
+        (async () => {
+            try {
+                const stored = await AsyncStorage.getItem('quiz-settings');
+                if (stored) {
+                    const settings = JSON.parse(stored);
+                    setQuizLength(settings.quizLength);
+                    setReminderEnabled(settings.reminderEnabled);
+                    setReminderTime(new Date(settings.reminderTime));
+                    setDifficulty(settings.difficulty);
+                }
+                setSettingsLoaded(true);
+            } catch (error) {
+                console.error('❌ Failed to load quiz-settings:', error);
+            }
+        })();
+    }, []);
+
+    useEffect(() => {
+        if (!settingsLoaded) return;
+
         const saveSettings = async () => {
-            const settings = {
-                quizLength,
-                reminderEnabled,
-                reminderTime,
-                difficulty,
-            };
+            const settings = { quizLength, reminderEnabled, reminderTime, difficulty };
             await AsyncStorage.setItem('quiz-settings', JSON.stringify(settings));
         };
         saveSettings();
@@ -110,36 +78,25 @@ export default function SettingsScreen() {
         }
     };
 
-
     const scheduleDailyReminder = async (time) => {
         try {
             await Notifications.cancelAllScheduledNotificationsAsync();
-
             const permission = await Notifications.requestPermissionsAsync();
-            if (!permission.granted && permission.status !== 'granted') {
+            if (!permission.granted) {
                 Alert.alert('Permission Required', 'Please enable notifications to receive reminders.');
                 return;
             }
 
-            // Construct next trigger time using selected hour/minute
             const now = new Date();
-            const date = new Date(Date.now());
-            date.setHours(time.getHours());
-            date.setMinutes(time.getMinutes());
-            date.setSeconds(0);
-            date.setMilliseconds(0);
-
-            // If the time has already passed today, schedule for tomorrow
-            if (date <= now) {
-                date.setDate(date.getDate() + 1);
-            }
+            const date = new Date();
+            date.setHours(time.getHours(), time.getMinutes(), 0, 0);
+            if (date <= now) date.setDate(date.getDate() + 1);
 
             await Notifications.scheduleNotificationAsync({
                 content: {
                     title: 'Time to Study 🧠',
                     body: 'Your daily ThinkB quiz is ready!',
                     sound: true,
-
                 },
                 trigger: {
                     type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -150,49 +107,58 @@ export default function SettingsScreen() {
                 },
             });
 
-
-            console.log('Notification scheduled for:', date.toString());
-            const notificationLog =await getAllScheduledNotificationsAsync()
-            console.log('All Scheduled Notifications:', notificationLog);
+            const log = await getAllScheduledNotificationsAsync();
+            console.log('🔔 Notification Scheduled:', log);
         } catch (err) {
-            console.error('❌ Failed to schedule daily reminder:', err);
+            console.error('❌ Failed to schedule reminder:', err);
         }
     };
-
-
 
     return (
         <View style={styles.container}>
             <Title style={styles.title}>Quiz Settings</Title>
 
-            {!isPro ? (<View style={styles.titleLine}><Icon name="lock" style={styles.icon} fill="#673AB7" /><Text style={styles.labelLocked}>Number of Questions: {quizLength}</Text></View>):(<Text style={styles.label}>Number of Questions: {quizLength}</Text>)}
+            {!isProUser ? (
+                <View style={styles.titleLine}>
+                    <Icon name="lock" style={styles.icon} fill="#673AB7" />
+                    <Text style={styles.labelLocked}>Number of Questions: {quizLength}</Text>
+                </View>
+            ) : (
+                <Text style={styles.label}>Number of Questions: {quizLength}</Text>
+            )}
             <Slider
                 style={{ width: '100%', height: 40 }}
                 minimumValue={5}
                 maximumValue={15}
                 step={5}
                 value={quizLength}
-                disabled={isPro}
+                disabled={!isProUser}
                 onSlidingComplete={setQuizLength}
                 minimumTrackTintColor="#6200ee"
                 maximumTrackTintColor="#ddd"
             />
 
-            {!isAdv ? (<View style={styles.titleLine}><Icon name="lock" style={styles.icon} fill="#673AB7" /><Text style={styles.labelLocked}>Difficulty:</Text></View>):(<Text style={styles.label}>Difficulty:</Text>)}
+            {isProUser || isAdvancedUser ? (
+                <View style={styles.titleLine}>
+                    <Text style={styles.label}>Difficulty:</Text>
+                </View>
+            ) : (
+                <View style={styles.titleLine}>
+                <Icon name="lock" style={styles.icon} fill="#673AB7" />
+                <Text style={styles.labelLocked}>Difficulty:</Text>
+                </View>
+            )}
             <SegmentedButtons
                 value={difficulty}
-                onValueChange={(value) => {
-                    console.log('📊 Difficulty changed to', value);
-                    setDifficulty(value);
-                }}
+                onValueChange={setDifficulty}
                 buttons={[
                     { value: 'easy', label: 'Easy' },
                     { value: 'medium', label: 'Medium' },
                     { value: 'hard', label: 'Hard' },
                 ]}
                 style={{
-                    opacity: isAdv ? 1 : 0.4,
-                    pointerEvents: isAdv ? 'auto' : 'none',
+                    opacity: isAdvancedUser || isProUser  ? 1 : 0.4,
+                    pointerEvents: isAdvancedUser || isProUser ? 'auto' : 'none',
                 }}
             />
 
@@ -206,7 +172,7 @@ export default function SettingsScreen() {
                     <Text style={styles.label}>
                         Reminder Time: {reminderTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Text>
-                    <Button mode="outlined" onPress={() => setShowTimePicker(true)}>Change Time</Button>
+                    <Button onPress={() => setShowTimePicker(true)}>Change Time</Button>
                 </View>
             )}
 
@@ -219,67 +185,49 @@ export default function SettingsScreen() {
                 />
             )}
             {!showTimePicker && (
-            <View style={styles.proCard}>
+                <View style={styles.proCard}>
                 <Title style={styles.title}>🚀 Be Pro</Title>
                 <Text style={{ marginBottom: 10 }}>
                     Unlock faster quizzes, remove ads, and boost your learning experience.
                 </Text>
-                { isAdv || isPro ? (
-                <Button
-                    mode="contained"
-                    icon="lock"
-                    style={styles.proButtonAfter}
-                    onPress={() => {
-                        Alert.alert('You are already an Advanced user!', 'Thank you for your support!'); // Alert if already Advanced
-                    }}
-                >
-                    You are an Advanced user!
-                </Button>
-                ) : (
-                <Button
-                    mode="contained"
-                    icon="rocket"
-                    style={styles.proButton}
-                    onPress={() => {
-                        navigation.navigate('AdvancedOffering'); // Navigate to the paywall screen
-                    }}>
-                    Upgrade to Advanced Member
-                </Button>
+                {!isAdvancedUser && !isProUser && (
+                    <Button
+                        mode="contained"
+                        icon="rocket"
+                        style={styles.proButton}
+                        onPress={() => navigation.navigate('AdvancedOffering')}
+                    >
+                        Upgrade to Advanced Member
+                    </Button>
                 )}
-                { isPro ?(
-                <Button
-                    mode="contained"
-                    icon="lock"
-                    style={styles.proButtonAfter}
-                    onPress={() => {
-                        Alert.alert('You are already a Pro user!', 'Thank you for your support!'); // Alert if already Pro
-
-                    }}
-                >
-                    You are a Pro user!
-                </Button>
-                    ):(
-                        <Button
-                            mode="contained"
-                            icon="star"
-                            style={styles.proButton}
-                            onPress={() => {
-                                navigation.navigate('PremiumOffering'); // Navigate to the paywall screen
-                            }}>
-                            Upgrade to Premium
-                        </Button>
-
-                    )}
+                {!isProUser && (
+                    <Button
+                        mode="contained"
+                        icon="star"
+                        style={styles.proButton}
+                        onPress={() => navigation.navigate('PremiumOffering')}
+                    >
+                        Upgrade to Premium
+                    </Button>
+                )}
+                {(isProUser || isAdvancedUser) && (
+                    <Button
+                        mode="contained"
+                        icon="lock"
+                        style={styles.proButtonAfter}
+                        onPress={() => Alert.alert('You are already subscribed!', 'Thank you for your support!')}
+                    >
+                        You are a {isProUser ? 'Pro' : 'Advanced'} user!
+                    </Button>
+                )}
                 <Pressable onPress={() => Linking.openURL('https://sameerthapa.dev')}>
-                <Text style={styles.cancelLink}>Cancel</Text>
+                    <Text style={styles.cancelLink}>Cancel</Text>
                 </Pressable>
             </View>
             )}
         </View>
-
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -318,6 +266,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 10,
     },
+
     icon: {
         width: 18,
         height: 18,

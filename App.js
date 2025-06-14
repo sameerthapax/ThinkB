@@ -9,7 +9,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CurvedBottomBar } from 'react-native-curved-bottom-bar';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
-import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -29,8 +28,11 @@ import MyQuizScreen from './screens/MyQuizScreen';
 
 
 //utils
-import { checkStreak } from './utils/streakManager';
+import { checkStreakOnLaunch } from './utils/checkStreakOnLaunch';
 import { initializeAppStorage } from './utils/initializeAppStorage';
+
+//context
+import { SubscriptionProvider } from './context/SubscriptionContext';
 
 const Stack = createNativeStackNavigator();
 
@@ -93,20 +95,6 @@ const TabNavigator = () => (
 export default function App() {
     const [initialRoute, setInitialRoute] = useState(null);
 
-    useEffect(() => {
-        Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
-        if (Platform.OS === 'ios'){
-            Purchases.configure({apiKey: 'appl_KbqCFBlFhDbkCzEcVhzVzaCtkJK'});
-        }
-        Purchases.getOfferings().then( (offerings) => {
-            if (offerings.current !== null) {
-                console.log(offerings.all['PremiumMember']);
-            } else {
-                console.log('No offerings available');
-            }}).catch((error) => {
-            console.error('Error loading offerings:', error);
-        })
-        }, []);
 
     useEffect(() => {
         const checkFirstLaunch = async () => {
@@ -122,13 +110,14 @@ export default function App() {
             }
         };
         checkFirstLaunch();
-        checkStreak();
+        checkStreakOnLaunch();
     }, []);
 
     if (!initialRoute) return null; // or a splash screen
 
     return (
         <>
+            <SubscriptionProvider>
             <IconRegistry icons={EvaIconsPack} />
             <ApplicationProvider {...eva} theme={eva.light}>
                 <NavigationContainer>
@@ -146,6 +135,7 @@ export default function App() {
                     </Stack.Navigator>
                 </NavigationContainer>
             </ApplicationProvider>
+            </SubscriptionProvider>
         </>
     );
 }

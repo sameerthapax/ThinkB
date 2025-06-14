@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sha256 } from 'js-sha256';
 
-export async function generateQuizFromText(content, options = {}, abortSignal = null) {
+export async function generateQuizFromText(content, options = {}, abortSignal = null, userStatus) {
     const {
         numberOfQuestions = 5,
         difficulty = 'easy',
@@ -41,19 +41,22 @@ Study Material:
 ${content}
 `;
 
-        // 3. Try LLaMA first
         try {
             const response = await axios.post(
                 'https://thinkb.xyz/generate',
                 {
-                    model: 'qwen2.5:3b',
-                    prompt,
+                    prompt: prompt,
                     stream: false,
                 },
                 {
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-api-key': 'unlimited-xyz@thinkb',
+                        'x-api-key':
+                            userStatus === 'pro'
+                                ? 'pro-xyz@thinkb'
+                                : userStatus === 'advanced'
+                                    ? 'advanced-xyz@thinkb'
+                                    : 'normal-xyz@thinkb',
                     },
                     signal: abortSignal,
                 }
@@ -74,27 +77,7 @@ ${content}
             console.warn('⚠️ LLaMA server failed, falling back to ChatGPT:', llamaError.message);
         }
 
-        // 4. Fallback to OpenAI ChatGPT only if not aborted
-        const openaiResponse = await axios.post(
-            'https://api.openai.com/v1/chat/completions',
-            {
-                model: 'gpt-3.5-turbo',
-                messages: [{ role: 'user', content: prompt }],
-                temperature: 0.7,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer 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`,
-                },
-                signal: abortSignal
-            }
-        );
 
-        const chatResponse = openaiResponse.data.choices[0].message.content;
-        await AsyncStorage.setItem(cacheKey, chatResponse);
-        console.log('✅ Quiz generated and cached successfully (ChatGPT):', chatResponse);
-        return chatResponse;
 
     } catch (error) {
         console.error('❌ Quiz generation failed:', error.toString());

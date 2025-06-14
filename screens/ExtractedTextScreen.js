@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,6 +7,9 @@ import { parseQuizJson } from '../utils/parseQuiz';
 import { useInterstitialAd } from '../utils/showAds';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
+
+import { SubscriptionContext } from '../context/SubscriptionContext';
+
 
 export default function ExtractedTextScreen() {
     const route = useRoute();
@@ -17,6 +20,8 @@ export default function ExtractedTextScreen() {
     const [loading, setLoading] = useState(false);
     const [showCheckmark, setShowCheckmark] = useState(false);
     const abortControllerRef = useRef(new AbortController());
+    const { isProUser, isAdvancedUser, refresh} = useContext(SubscriptionContext);
+
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -40,15 +45,24 @@ export default function ExtractedTextScreen() {
                 : { quizLength: 5, difficulty: 'easy' };
 
             await showAd();
-
+            await refresh();
+            // Determine user status
+            let userStatus = 'normal';
+            if (isProUser) {
+                userStatus = 'pro';
+            } else if (isAdvancedUser) {
+                userStatus = 'advanced';
+            }
             const rawQuizText = await generateQuizFromText(
                 extractedText,
                 {
                     numberOfQuestions: parsedSettings.quizLength,
                     difficulty: parsedSettings.difficulty,
                     generationMode: 'Manual'
+
                 },
-                abortControllerRef.current.signal
+                abortControllerRef.current.signal,
+                userStatus
             );
 
             if (!rawQuizText) {

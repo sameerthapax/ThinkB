@@ -8,6 +8,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import {SafeAreaView} from "react-native-safe-area-context";
+import {updateStreakAfterQuiz} from '../utils/updateStreakAfterQuiz';
 
 
 export default function QuizScreen() {
@@ -78,7 +79,11 @@ export default function QuizScreen() {
                 useNativeDriver: true,
             }).start();
 
-            saveHistory();
+            saveHistory().then(() => {
+                updateStreakAfterQuiz().then(() => {
+                    console.log('✅ Streak updated after quiz completion');
+                })
+            });
         }
         if (finished && isReview) {
             Animated.timing(fadeAnim, {
