@@ -75,6 +75,7 @@ ${content}
 
             // 🟡 LLaMA failed for other reason — fallback allowed
             console.warn('⚠️ LLaMA server failed, falling back to ChatGPT:', llamaError.message);
+            return "Failed";
         }
 
 

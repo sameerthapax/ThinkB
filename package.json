@@ -59,7 +59,8 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-webview": "^13.13.5",
     "expo-haptics": "~14.1.4",
-    "expo-blur": "~14.1.5"
+    "expo-blur": "~14.1.5",
+    "expo-background-fetch": "~13.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",

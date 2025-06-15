@@ -80,4 +80,3 @@ export const runBackgroundQuizGeneration = async () => {
     }
 };
 
-TaskManager.defineTask(TASK_NAME, runBackgroundQuizGeneration);

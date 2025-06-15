@@ -9,6 +9,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CurvedBottomBar } from 'react-native-curved-bottom-bar';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
+import * as TaskManager from 'expo-task-manager';
+import * as BackgroundFetch from 'expo-background-fetch';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -30,6 +32,7 @@ import MyQuizScreen from './screens/MyQuizScreen';
 //utils
 import { checkStreakOnLaunch } from './utils/checkStreakOnLaunch';
 import { initializeAppStorage } from './utils/initializeAppStorage';
+import { runBackgroundQuizGeneration, TASK_NAME } from './utils/backgroundTask'; // adjust path
 
 //context
 import { SubscriptionProvider } from './context/SubscriptionContext';
@@ -92,10 +95,39 @@ const TabNavigator = () => (
     </CurvedBottomBar.Navigator>
 );
 
+TaskManager.defineTask(TASK_NAME, async () => {
+    console.log('📡 Running background fetch task...');
+    return await runBackgroundQuizGeneration()
+        .then(() => BackgroundFetch.BackgroundFetchResult.NewData)
+        .catch(err => {
+            console.error('❌ Background task failed:', err);
+            return BackgroundFetch.BackgroundFetchResult.Failed;
+        });
+});
+
+const registerBackgroundTask = async () => {
+    try {
+        const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
+        if (!isRegistered) {
+            await BackgroundFetch.registerTaskAsync(TASK_NAME, {
+                minimumInterval: 60 * 60 * 24, // every 24 hours
+                stopOnTerminate: false,
+                startOnBoot: true,
+            });
+            console.log('✅ Background task registered');
+        }
+    } catch (err) {
+        console.error('❌ Error registering background task:', err);
+    }
+};
+
+
 export default function App() {
     const [initialRoute, setInitialRoute] = useState(null);
 
-
+    useEffect(() => {
+        registerBackgroundTask();
+    }, []);
     useEffect(() => {
         const checkFirstLaunch = async () => {
             const value = await AsyncStorage.getItem('hasSeenOnboarding');

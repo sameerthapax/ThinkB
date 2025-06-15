@@ -64,6 +64,11 @@ export default function ExtractedTextScreen() {
                 abortControllerRef.current.signal,
                 userStatus
             );
+            if(rawQuizText==='Failed') {
+                setLoading(false);
+                alert('Failed to generate quiz. Quiz limit reached for today. Try again after 24Hrs.');
+                return;
+            }
 
             if (!rawQuizText) {
                 setLoading(false);

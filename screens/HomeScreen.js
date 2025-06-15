@@ -232,7 +232,7 @@ export default function HomeScreen({ navigation }) {
             {/*        {evaProps => <Text {...evaProps} style={styles.menuButtonText}>Test Notification scheduel</Text>}*/}
             {/*    </Button>*/}
             {/*    <Button onPress={logAsyncStorage}>Log AsyncStorage</Button>*/}
-                <Button onPress={handleTestBackground}>test background app</Button>
+            {/*    <Button onPress={handleTestBackground}>test background app</Button>*/}
 
 
             {/*</View>*/}
