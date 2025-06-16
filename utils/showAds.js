@@ -1,14 +1,21 @@
 import { useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
 import {
     InterstitialAd,
     AdEventType,
     TestIds,
 } from 'react-native-google-mobile-ads';
 
-const PROD_AD_UNIT_ID = 'ca-app-pub-2904800020194076/4851223573';
+const PROD_AD_UNIT_ID_IOS = 'ca-app-pub-2904800020194076/4851223573';
+const PROD_AD_UNIT_ID_ANDROID = 'ca-app-pub-2904800020194076/3865917723';
 
 export const useInterstitialAd = () => {
-    const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : PROD_AD_UNIT_ID;
+    const adUnitId = __DEV__
+        ? TestIds.INTERSTITIAL
+        : Platform.select({
+            ios: PROD_AD_UNIT_ID_IOS,
+            android: PROD_AD_UNIT_ID_ANDROID,
+        });
     const [isLoaded, setIsLoaded] = useState(false);
 
     const interstitialRef = useRef(
