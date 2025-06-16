@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { StyleSheet, ActivityIndicator, View, Alert } from 'react-native';
 import { Layout, Text, Button } from '@ui-kitten/components';
 import * as DocumentPicker from 'expo-document-picker';
@@ -8,6 +8,9 @@ import * as FileSystem from 'expo-file-system';
 import { WebView } from 'react-native-webview';
 import LottieView from 'lottie-react-native';
 
+import { SubscriptionContext } from '../context/SubscriptionContext';
+
+
 export default function UploadScreen() {
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
@@ -15,6 +18,8 @@ export default function UploadScreen() {
     const navigation = useNavigation();
     const webviewRef = useRef(null);
     const { showAd } = useInterstitialAd();
+    const { isProUser, isAdvancedUser, refresh} = useContext(SubscriptionContext);
+
 
     const handleUpload = async () => {
         try {
@@ -29,7 +34,10 @@ export default function UploadScreen() {
             }
 
             setLoading(true);
-            await showAd();
+            await refresh(); // Refresh subscription status before proceeding
+            if (!isProUser && !isAdvancedUser) {
+                await showAd(); // Show ad before processing if not a pro user
+            }
 
             const file = result.assets[0];
             const fileUri = file.uri;

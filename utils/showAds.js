@@ -9,6 +9,8 @@ const PROD_AD_UNIT_ID = 'ca-app-pub-2904800020194076/4851223573';
 
 export const useInterstitialAd = () => {
     const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : PROD_AD_UNIT_ID;
+    const [isLoaded, setIsLoaded] = useState(false);
+
     const interstitialRef = useRef(
         InterstitialAd.createForAdRequest(adUnitId, {
             requestNonPersonalizedAdsOnly: true,
@@ -16,28 +18,41 @@ export const useInterstitialAd = () => {
     );
 
     useEffect(() => {
-        interstitialRef.current.load();
+        const interstitial = interstitialRef.current;
+
+        const onAdEvent = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+            setIsLoaded(true);
+        });
+
+        const onAdError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
+            setIsLoaded(false);
+        });
+
+        interstitial.load();
+
+        return () => {
+            onAdEvent();
+            onAdError();
+        };
     }, []);
 
     const showAd = () => {
         return new Promise((resolve) => {
             const interstitial = interstitialRef.current;
 
-            if (interstitial?.loaded) {
-                const unsubscribe = interstitial.addAdEventListener(
-                    AdEventType.CLOSED,
-                    () => {
-                        console.log('✅ Interstitial ad closed');
-                        resolve();
-                        unsubscribe(); // cleanup
-                        interstitial.load(); // preload next ad
-                    }
-                );
+            if (isLoaded) {
+                const onClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+                    __DEV__ && console.log('✅ Interstitial ad closed');
+                    setIsLoaded(false);
+                    interstitial.load(); // preload next
+                    resolve();
+                    onClose();
+                });
 
                 interstitial.show();
             } else {
-                console.log('⚠️ Interstitial ad not yet loaded');
-                resolve(); // fallback
+                __DEV__ && console.log('⚠️ Interstitial ad not ready');
+                resolve();
             }
         });
     };

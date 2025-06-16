@@ -11,10 +11,12 @@
       "expo-notifications",
       "expo-background-task",
       "expo-asset",
-      ["react-native-google-mobile-ads",
-      {
-        "iosAppId": "ca-app-pub-2904800020194076~8314706306"
-      }],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "iosAppId": "ca-app-pub-2904800020194076~8314706306"
+        }
+      ],
       [
         "expo-build-properties",
         {
@@ -22,7 +24,8 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "splash": {
       "image": "./assets/splash-icon.png",

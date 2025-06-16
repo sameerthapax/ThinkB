@@ -1,6 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sha256 } from 'js-sha256';
+import * as SecureStore from 'expo-secure-store';
+
 
 export async function generateQuizFromText(content, options = {}, abortSignal = null, userStatus) {
     const {
@@ -42,6 +44,8 @@ ${content}
 `;
 
         try {
+            const apiKey = await SecureStore.getItemAsync('api-key');
+            console.log('🔑 Using API key:', apiKey);
             const response = await axios.post(
                 'https://thinkb.xyz/generate',
                 {
@@ -51,12 +55,7 @@ ${content}
                 {
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-api-key':
-                            userStatus === 'pro'
-                                ? 'pro-xyz@thinkb'
-                                : userStatus === 'advanced'
-                                    ? 'advanced-xyz@thinkb'
-                                    : 'normal-xyz@thinkb',
+                        'x-api-key': apiKey,
                     },
                     signal: abortSignal,
                 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
 import * as eva from '@eva-design/eva';
 import { ApplicationProvider, IconRegistry, Icon } from '@ui-kitten/components';
@@ -32,9 +32,7 @@ import MyQuizScreen from './screens/MyQuizScreen';
 //utils
 import { checkStreakOnLaunch } from './utils/checkStreakOnLaunch';
 import { initializeAppStorage } from './utils/initializeAppStorage';
-import { runBackgroundQuizGeneration, TASK_NAME } from './utils/backgroundTask'; // adjust path
-
-//context
+import { runBackgroundQuizGeneration, TASK_NAME } from './utils/backgroundTask';
 import { SubscriptionProvider } from './context/SubscriptionContext';
 
 const Stack = createNativeStackNavigator();
@@ -114,7 +112,7 @@ const registerBackgroundTask = async () => {
                 stopOnTerminate: false,
                 startOnBoot: true,
             });
-            console.log('✅ Background task registered');
+            console.log('✅Background task registered');
         }
     } catch (err) {
         console.error('❌ Error registering background task:', err);
@@ -139,6 +137,7 @@ export default function App() {
             } else {
                 // Not first launch, show main app
                 setInitialRoute('ThinkB');
+
             }
         };
         checkFirstLaunch();

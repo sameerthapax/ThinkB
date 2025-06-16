@@ -43,8 +43,6 @@ export default function ExtractedTextScreen() {
             const parsedSettings = settings
                 ? JSON.parse(settings)
                 : { quizLength: 5, difficulty: 'easy' };
-
-            await showAd();
             await refresh();
             // Determine user status
             let userStatus = 'normal';
@@ -52,7 +50,10 @@ export default function ExtractedTextScreen() {
                 userStatus = 'pro';
             } else if (isAdvancedUser) {
                 userStatus = 'advanced';
+            }else {
+                await showAd(); // Show ad before processing if not a pro user
             }
+
             const rawQuizText = await generateQuizFromText(
                 extractedText,
                 {

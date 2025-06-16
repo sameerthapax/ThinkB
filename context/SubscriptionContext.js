@@ -2,6 +2,8 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { Platform } from 'react-native';
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeHashedApiKey } from '../utils/initializeAppStorage';
+
 
 export const SubscriptionContext = createContext();
 
@@ -21,6 +23,7 @@ export const SubscriptionProvider = ({ children }) => {
                 if (userEntitlements.isPro) tier = 'pro';
                 else if (userEntitlements.isAdv) tier = 'advanced';
                 await AsyncStorage.setItem('user-tier', tier);
+                await initializeHashedApiKey(tier);
                 console.log('💾 Stored user-tier in AsyncStorage:', tier);
             } catch (err) {
                 console.error('❌ Failed to persist user tier:', err);
