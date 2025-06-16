@@ -8,7 +8,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CurvedBottomBar } from 'react-native-curved-bottom-bar';
 import * as Haptics from 'expo-haptics';
-import { BlurView } from 'expo-blur';
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundTask from 'expo-background-task';
 
