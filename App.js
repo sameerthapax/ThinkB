@@ -10,7 +10,7 @@ import { CurvedBottomBar } from 'react-native-curved-bottom-bar';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
 import * as TaskManager from 'expo-task-manager';
-import * as BackgroundFetch from 'expo-background-fetch';
+import * as BackgroundTask from 'expo-background-task';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -96,10 +96,10 @@ const TabNavigator = () => (
 TaskManager.defineTask(TASK_NAME, async () => {
     console.log('📡 Running background fetch task...');
     return await runBackgroundQuizGeneration()
-        .then(() => BackgroundFetch.BackgroundFetchResult.NewData)
+        .then(() => BackgroundTask.BackgroundFetchResult.NewData)
         .catch(err => {
             console.error('❌ Background task failed:', err);
-            return BackgroundFetch.BackgroundFetchResult.Failed;
+            return BackgroundTask.BackgroundFetchResult.Failed;
         });
 });
 
@@ -107,7 +107,7 @@ const registerBackgroundTask = async () => {
     try {
         const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
         if (!isRegistered) {
-            await BackgroundFetch.registerTaskAsync(TASK_NAME, {
+            await BackgroundTask.registerTaskAsync(TASK_NAME, {
                 minimumInterval: 60 * 60 * 24, // every 24 hours
                 stopOnTerminate: false,
                 startOnBoot: true,

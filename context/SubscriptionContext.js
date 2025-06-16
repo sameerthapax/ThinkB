@@ -56,7 +56,7 @@ export const SubscriptionProvider = ({ children }) => {
 
     // Effect for RevenueCat configuration and initial offerings check
     useEffect(() => {
-        Purchases.setLogLevel(LOG_LEVEL.VERBOSE); // Set log level for detailed debugging
+        __DEV__ && Purchases.setLogLevel(LOG_LEVEL.VERBOSE); // Set log level for detailed debugging
         if (Platform.OS === 'ios') {
             // Configure RevenueCat with your API key for iOS
             Purchases.configure({ apiKey: 'appl_KbqCFBlFhDbkCzEcVhzVzaCtkJK' });
