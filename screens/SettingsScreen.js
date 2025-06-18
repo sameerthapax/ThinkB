@@ -223,6 +223,15 @@ export default function SettingsScreen() {
                 <Pressable onPress={() => Linking.openURL('https://sameerthapa.dev')}>
                     <Text style={styles.cancelLink}>Cancel</Text>
                 </Pressable>
+                    <View style={styles.linkRow}>
+                        <Pressable onPress={() => Linking.openURL('https://sameerthapax.github.io/ThinkB-Privacy-Policy/')}>
+                            <Text style={styles.legalLink}>Privacy Policy</Text>
+                        </Pressable>
+                        <Text style={styles.separator}>•</Text>
+                        <Pressable onPress={() => Linking.openURL('https://sameerthapax.github.io/ThinkB-Terms-of-Service/')}>
+                            <Text style={styles.legalLink}>Terms of Service</Text>
+                        </Pressable>
+                    </View>
             </View>
             )}
         </View>
@@ -288,5 +297,21 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         marginTop: 10,
         fontSize: 16,
+    },
+    linkRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    legalLink: {
+        color: '#7c3aed',
+        fontSize: 14,
+        textDecorationLine: 'underline',
+        marginHorizontal: 4,
+    },
+    separator: {
+        fontSize: 14,
+        color: '#7c3aed',
     },
 });

@@ -143,7 +143,7 @@ export default function App() {
         checkStreakOnLaunch();
     }, []);
 
-    if (!initialRoute) return null; // or a splash screen
+    if (!initialRoute) return null;
 
     return (
         <>
