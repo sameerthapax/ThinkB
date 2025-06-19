@@ -3,7 +3,7 @@ import { StyleSheet, FlatList, TouchableOpacity, View } from 'react-native';
 import { Layout, Text } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import {SafeAreaView} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UploadHistoryScreen() {
     const [materials, setMaterials] = useState([]);
@@ -11,14 +11,38 @@ export default function UploadHistoryScreen() {
 
     useEffect(() => {
         const loadMaterials = async () => {
-            const stored = await AsyncStorage.getItem('study-materials');
-            const list = stored ? JSON.parse(stored) : [];
-            setMaterials(list.reverse());
+            try {
+                const stored = await AsyncStorage.getItem('study-materials');
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        if (Array.isArray(parsed)) {
+                            setMaterials(parsed.reverse());
+                        } else {
+                            console.warn('📛 Stored materials is not an array');
+                            setMaterials([]);
+                        }
+                    } catch (parseErr) {
+                        console.error('❌ Failed to parse study-materials:', parseErr);
+                        setMaterials([]);
+                    }
+                } else {
+                    setMaterials([]);
+                }
+            } catch (err) {
+                console.error('❌ Failed to load study-materials:', err);
+                setMaterials([]);
+            }
         };
         loadMaterials();
     }, []);
 
     const handlePress = (item) => {
+        if (!item?.fileName || !item?.text) {
+            console.warn('⚠️ Incomplete material object, skipping navigation');
+            return;
+        }
+
         navigation.navigate('ExtractedText', {
             fileName: item.fileName,
             extractedText: item.text,
@@ -28,27 +52,33 @@ export default function UploadHistoryScreen() {
     const renderItem = ({ item }) => (
         <TouchableOpacity onPress={() => handlePress(item)} activeOpacity={0.8}>
             <View style={styles.glassCard}>
-                <Text category="h6" style={styles.title}>{item.fileName}</Text>
-                <Text appearance="hint" style={styles.date}>{new Date(item.uploadDate).toLocaleString()}</Text>
-                <Text category="p2" style={styles.excerpt}>{item.text.slice(0, 200)}...</Text>
+                <Text category="h6" style={styles.title}>{item.fileName || 'Untitled'}</Text>
+                <Text appearance="hint" style={styles.date}>
+                    {item.uploadDate ? new Date(item.uploadDate).toLocaleString() : 'Unknown date'}
+                </Text>
+                <Text category="p2" style={styles.excerpt}>
+                    {(item.text || '').slice(0, 200)}...
+                </Text>
             </View>
         </TouchableOpacity>
     );
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingBottom:0 } } edges={['bottom']}>
-            {materials.length === 0 ?(
-                <Text appearance="hint" style={styles.emptyText}>You haven’t uploaded any materials yet.</Text>
-            ):(
-        <Layout style={styles.container}>
-            <FlatList
-                data={materials}
-                keyExtractor={(_, index) => index.toString()}
-                renderItem={renderItem}
-                contentContainerStyle={styles.list}
-            />
-        </Layout>
-                )}
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['bottom']}>
+            {materials.length === 0 ? (
+                <Text appearance="hint" style={styles.emptyText}>
+                    You haven’t uploaded any materials yet.
+                </Text>
+            ) : (
+                <Layout style={styles.container}>
+                    <FlatList
+                        data={materials}
+                        keyExtractor={(_, index) => index.toString()}
+                        renderItem={renderItem}
+                        contentContainerStyle={styles.list}
+                    />
+                </Layout>
+            )}
         </SafeAreaView>
     );
 }
@@ -73,7 +103,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.08,
         shadowRadius: 6,
         elevation: 2,
-        effect: 'blur(10px)',
     },
     title: {
         fontWeight: 'bold',

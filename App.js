@@ -77,8 +77,12 @@ const TabNavigator = () => (
                         width: size, height: size, marginLeft: '50%', left: '-25%', marginBottom: 10
                     }}
                     onPress={() => {
+                        try{
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         navigate(routeName)
+                            } catch (err) {
+                            console.error('❌ Navigation error:', err);
+                        }
                     }}
                 />
             );
@@ -107,14 +111,15 @@ const registerBackgroundTask = async () => {
         const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
         if (!isRegistered) {
             await BackgroundTask.registerTaskAsync(TASK_NAME, {
-                minimumInterval: 60 * 60 * 24, // every 24 hours
+                minimumInterval: 60 * 60 * 24,
                 stopOnTerminate: false,
                 startOnBoot: true,
             });
-            console.log('✅Background task registered');
+            console.log('✅ Background task registered');
         }
     } catch (err) {
         console.error('❌ Error registering background task:', err);
+        alert('Failed to set up daily auto-quiz. Please enable background services.');
     }
 };
 
@@ -127,20 +132,30 @@ export default function App() {
     }, []);
     useEffect(() => {
         const checkFirstLaunch = async () => {
-            const value = await AsyncStorage.getItem('hasSeenOnboarding');
-            if (value === null) {
-                // First launch, show onboarding
-                await initializeAppStorage(); // Set all default values
-                setInitialRoute('Onboarding');
-                await AsyncStorage.setItem('hasSeenOnboarding', 'true');
-            } else {
-                // Not first launch, show main app
-                setInitialRoute('ThinkB');
-
+            try {
+                const value = await AsyncStorage.getItem('hasSeenOnboarding');
+                if (value === null) {
+                    await initializeAppStorage();
+                    setInitialRoute('Onboarding');
+                    await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+                } else {
+                    setInitialRoute('ThinkB');
+                }
+            } catch (e) {
+                console.error('🚨 Error checking first launch:', e);
+                alert('Something went wrong while starting the app. Please restart.');
+                setInitialRoute('ThinkB'); // fallback to app home
             }
         };
-        checkFirstLaunch();
-        checkStreakOnLaunch();
+        const init = async () => {
+            await checkFirstLaunch();
+            try {
+                await checkStreakOnLaunch();
+            } catch (e) {
+                console.error('⚠️ Error checking streak:', e);
+            }
+        };
+        init();
     }, []);
 
     if (!initialRoute) return null;

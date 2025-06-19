@@ -53,27 +53,35 @@ export default function HomeScreen({ navigation }) {
 
 
     const handleTestBackground = async () => {
-        await runBackgroundQuizGeneration();
+        try {
+            await runBackgroundQuizGeneration();
+        } catch (err) {
+            alert('Failed to run background quiz generation');
+            console.error('⚠️ Background task failed:', err);
+        }
     };
     useEffect(() => {
         const checkAndNavigateToQuiz = async () => {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const quizKey = `quizAG-${todayStr}`;
-            const existing = await AsyncStorage.getItem(quizKey);
-            const autoQuizShown = await AsyncStorage.getItem('autoQuizShown');
+            try {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const quizKey = `quizAG-${todayStr}`;
+                const existing = await AsyncStorage.getItem(quizKey);
+                const autoQuizShown = await AsyncStorage.getItem('autoQuizShown');
 
-
-            if (existing && autoQuizShown !== 'true') {
-                setTimeout(() => {
-                    AsyncStorage.setItem('autoQuizShown', 'true');
-                    navigation.navigate('ThinkB', {
-                        screen: 'Quiz',
-                        params: { Quiz: JSON.parse(existing) },
-                    });
-                }, 2000);
+                if (existing && autoQuizShown !== 'true') {
+                    const parsedQuiz = JSON.parse(existing);
+                    setTimeout(() => {
+                        AsyncStorage.setItem('autoQuizShown', 'true');
+                        navigation.navigate('ThinkB', {
+                            screen: 'Quiz',
+                            params: { Quiz: parsedQuiz },
+                        });
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('❌ Failed to auto-navigate to quiz:', err);
             }
         };
-
         checkAndNavigateToQuiz();
     }, []);
 
@@ -90,11 +98,10 @@ export default function HomeScreen({ navigation }) {
         return () => clearInterval(interval);
     }, []));
     useFocusEffect(useCallback(() => {
-        streaksRefs.current?.play();
+        Object.values(badgeRefs.current).forEach(ref => ref?.play());
         const interval = setInterval(() => {
-            streaksRefs.current?.play();
+            Object.values(badgeRefs.current).forEach(ref => ref?.play());
         }, 10 * 1000);
-
         return () => clearInterval(interval);
     }, []));
     const InfoIcon = (props) => <Icon {...props} name="arrow-circle-up" fill={'#7c3aed'} />;
@@ -105,9 +112,13 @@ export default function HomeScreen({ navigation }) {
         />
     );
     React.useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => renderRightActions(navigation),
-        });
+        try {
+            navigation?.setOptions({
+                headerRight: () => renderRightActions(navigation),
+            });
+        } catch (e) {
+            console.warn('⚠️ Failed to set header options:', e);
+        }
     }, [navigation]);
 
 
@@ -116,33 +127,43 @@ export default function HomeScreen({ navigation }) {
     useFocusEffect(
         useCallback(() => {
             const loadStreakAndScore = async () => {
-                const storedStreak = await AsyncStorage.getItem('quiz-streak');
-                const streakData = storedStreak ? JSON.parse(storedStreak) : { streak: 0 };
-                setStreak(streakData.streak);
-
-                const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
-
-                const historyRaw = await AsyncStorage.getItem('quiz-history');
-                const fileHistoryRaw = await AsyncStorage.getItem('study-materials');
-                const history = historyRaw ? JSON.parse(historyRaw) : [];
-                const fileHistory = fileHistoryRaw ? JSON.parse(fileHistoryRaw) : [];
-
-                const todaysQuizzes = history.filter(q => q.date === today);
-                const todaysFileHistory = fileHistory.filter(q => q.uploadDate.split('T')[0] === today);
-
-                if (todaysQuizzes.length > 0) {
-                    // Optional: sort by time if needed
-                    const sorted = todaysQuizzes.sort((a, b) =>
-                        new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`)
-                    );
-
-                    setTodayScore(sorted[0].score);
-
-                } else {
-                    setTodayScore(0); // No quiz today yet
+                try {
+                    const storedStreak = await AsyncStorage.getItem('quiz-streak');
+                    const streakData = storedStreak ? JSON.parse(storedStreak) : { streak: 0 };
+                    setStreak(streakData.streak);
+                } catch (e) {
+                    console.warn('⚠️ Error loading streak:', e);
+                    setStreak(0);
                 }
-                setTotalQuizToday(todaysQuizzes.length); //  set total quiz today
-                setTodayTotalDocument(todaysFileHistory.length); //  set total quiz today
+
+                const today = new Date().toISOString().split('T')[0];
+
+                try {
+                    const historyRaw = await AsyncStorage.getItem('quiz-history');
+                    const fileHistoryRaw = await AsyncStorage.getItem('study-materials');
+                    const history = historyRaw ? JSON.parse(historyRaw) : [];
+                    const fileHistory = fileHistoryRaw ? JSON.parse(fileHistoryRaw) : [];
+
+                    const todaysQuizzes = history.filter(q => q.date === today);
+                    const todaysFileHistory = fileHistory.filter(q => q.uploadDate?.split('T')[0] === today);
+
+                    if (todaysQuizzes.length > 0) {
+                        const sorted = todaysQuizzes.sort((a, b) =>
+                            new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`)
+                        );
+                        setTodayScore(sorted[0].score);
+                    } else {
+                        setTodayScore(0);
+                    }
+
+                    setTotalQuizToday(todaysQuizzes.length);
+                    setTodayTotalDocument(todaysFileHistory.length);
+                } catch (e) {
+                    console.error('❌ Error reading history:', e);
+                    setTodayScore(0);
+                    setTotalQuizToday(0);
+                    setTodayTotalDocument(0);
+                }
             };
 
             loadStreakAndScore();

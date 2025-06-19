@@ -7,9 +7,7 @@ import { useInterstitialAd } from '../utils/showAds';
 import * as FileSystem from 'expo-file-system';
 import { WebView } from 'react-native-webview';
 import LottieView from 'lottie-react-native';
-
 import { SubscriptionContext } from '../context/SubscriptionContext';
-
 
 export default function UploadScreen() {
     const [loading, setLoading] = useState(false);
@@ -18,8 +16,7 @@ export default function UploadScreen() {
     const navigation = useNavigation();
     const webviewRef = useRef(null);
     const { showAd } = useInterstitialAd();
-    const { isProUser, isAdvancedUser, refresh} = useContext(SubscriptionContext);
-
+    const { isProUser = false, isAdvancedUser = false, refresh } = useContext(SubscriptionContext); // fallback added
 
     const handleUpload = async () => {
         try {
@@ -28,19 +25,22 @@ export default function UploadScreen() {
                 copyToCacheDirectory: false,
             });
 
-            if (result.canceled || !result.assets || result.assets.length === 0) {
+            if (result.canceled || !result.assets?.length) {
                 Alert.alert('Cancelled', 'You cancelled the file selection.');
                 return;
             }
 
             setLoading(true);
-            await refresh(); // Refresh subscription status before proceeding
+            await refresh?.(); // optional chaining in case refresh is undefined
+
             if (!isProUser && !isAdvancedUser) {
-                await showAd(); // Show ad before processing if not a pro user
+                await showAd?.(); // safe check for ad function
             }
 
             const file = result.assets[0];
-            const fileUri = file.uri;
+            const fileUri = file?.uri;
+
+            if (!fileUri) throw new Error('Invalid file URI.');
 
             const base64 = await FileSystem.readAsStringAsync(fileUri, {
                 encoding: FileSystem.EncodingType.Base64,
@@ -49,14 +49,15 @@ export default function UploadScreen() {
             setPdfBase64(base64);
         } catch (error) {
             console.error('❌ Error uploading PDF:', error);
+            setLoading(false);
             Alert.alert('Error', 'Something went wrong during upload.');
         }
     };
 
     const handleMessage = (event) => {
-        const extractedText = event.nativeEvent.data?.trim();
+        const extractedText = event?.nativeEvent?.data?.trim();
 
-        if (!extractedText || extractedText === '') {
+        if (!extractedText) {
             setPdfBase64(null);
             setLoading(false);
             Alert.alert('Extraction Failed', 'Could not extract text from PDF. Please try another file.');
@@ -115,14 +116,16 @@ export default function UploadScreen() {
                     originWhitelist={['*']}
                     onMessage={handleMessage}
                     onError={(e) => {
-                        console.error('❌ WebView error:', e.nativeEvent);
+                        console.error('❌ WebView error:', e?.nativeEvent);
                         setLoading(false);
                         setPdfBase64(null);
                         Alert.alert('Error', 'WebView failed to load. Try again.');
                     }}
                     onLoad={() => {
                         const js = `window.loadPdfFromBase64("${pdfBase64}"); true;`;
-                        webviewRef.current?.injectJavaScript(js);
+                        if (webviewRef.current) {
+                            webviewRef.current.injectJavaScript(js);
+                        }
                     }}
                     style={{ height: 0, width: 0 }}
                 />

@@ -1,15 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, Animated, TouchableOpacity  } from 'react-native';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { View, StyleSheet, Animated, TouchableOpacity, Alert } from 'react-native';
 import { Text } from '@ui-kitten/components';
 import { Button } from 'react-native-paper';
 import LottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
-import {SafeAreaView} from "react-native-safe-area-context";
-import {updateStreakAfterQuiz} from '../utils/updateStreakAfterQuiz';
-
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { updateStreakAfterQuiz } from '../utils/updateStreakAfterQuiz';
 
 export default function QuizScreen() {
     const route = useRoute();
@@ -29,14 +26,19 @@ export default function QuizScreen() {
     useFocusEffect(
         useCallback(() => {
             const loadQuiz = async () => {
-                if (route.params?.Quiz) {
-                    setQuiz(route.params.Quiz);
-                } else {
-                    const todayKey = `quiz-${new Date().toISOString().split('T')[0]}`;
-                    const stored = await AsyncStorage.getItem(todayKey);
-                    if (stored) {
-                        setQuiz(JSON.parse(stored));
+                try {
+                    if (externalQuiz) {
+                        setQuiz(externalQuiz);
+                    } else {
+                        const todayKey = `quiz-${new Date().toISOString().split('T')[0]}`;
+                        const stored = await AsyncStorage.getItem(todayKey);
+                        const parsed = stored ? JSON.parse(stored) : [];
+                        if (Array.isArray(parsed)) setQuiz(parsed);
+                        else throw new Error('Parsed quiz is not an array');
                     }
+                } catch (err) {
+                    console.error('❌ Failed to load quiz:', err);
+                    Alert.alert('Error', 'Unable to load quiz data.');
                 }
             };
 
@@ -52,71 +54,74 @@ export default function QuizScreen() {
         }, [route.params])
     );
 
-
-
     useEffect(() => {
-        if (finished && !isReview) {
-            const saveHistory = async () => {
-                const today = new Date().toISOString().split('T')[0];
-                const todayTimeLocal = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-                const historyItem = {
-                    date: today,
-                    time: todayTimeLocal,
-                    score,
-                    total: quiz.length,
-                    quiz,
-                };
-                const existing = await AsyncStorage.getItem('quiz-history');
-                const history = existing ? JSON.parse(existing) : [];
-                history.push(historyItem);
-                await AsyncStorage.setItem('quiz-history', JSON.stringify(history));
+        if (finished) {
+            const animateAndSave = async () => {
+                try {
+                    Animated.timing(fadeAnim, {
+                        toValue: 1,
+                        duration: 800,
+                        useNativeDriver: true,
+                    }).start();
+
+                    if (!isReview) {
+                        const today = new Date().toISOString().split('T')[0];
+                        const todayTimeLocal = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+                        const historyItem = {
+                            date: today,
+                            time: todayTimeLocal,
+                            score,
+                            total: quiz.length,
+                            quiz,
+                        };
+
+                        const existing = await AsyncStorage.getItem('quiz-history');
+                        const history = existing ? JSON.parse(existing) : [];
+                        history.push(historyItem);
+                        await AsyncStorage.setItem('quiz-history', JSON.stringify(history));
+
+                        await updateStreakAfterQuiz();
+                    }
+                } catch (err) {
+                    console.error('❌ Error saving history or updating streak:', err);
+                }
             };
 
-
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 800,
-                useNativeDriver: true,
-            }).start();
-
-            saveHistory().then(() => {
-                updateStreakAfterQuiz().then(() => {
-                    console.log('✅ Streak updated after quiz completion');
-                })
-            });
-        }
-        if (finished && isReview) {
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 800,
-                useNativeDriver: true,
-            }).start();
+            animateAndSave();
         }
     }, [finished]);
+
     const renderRightActions = (navigation) => {
-        if (!isReview) return (
-        <TouchableOpacity
-            onPress={() => navigation.navigate('QuizBuilderStart')}
-            style={{ marginRight: 16 }}
-        >
-            <Text style={{ color: '#7c3aed', fontSize: 16 }}>Create</Text>
-        </TouchableOpacity>
-    )};
-    React.useLayoutEffect(() => {
+        if (!isReview) {
+            return (
+                <TouchableOpacity onPress={() => navigation.navigate('QuizBuilderStart')} style={{ marginRight: 16 }}>
+                    <Text style={{ color: '#7c3aed', fontSize: 16 }}>Create</Text>
+                </TouchableOpacity>
+            );
+        }
+    };
+
+    useEffect(() => {
         navigation.setOptions({
             headerRight: () => renderRightActions(navigation),
         });
     }, [navigation]);
 
     const handleFinish = () => {
-        navigation.navigate(isReview ? 'History' : 'Home');
+        try {
+            navigation.navigate(isReview ? 'History' : 'Home');
+        } catch (err) {
+            console.error('❌ Navigation error:', err);
+            Alert.alert('Error', 'Unable to navigate to the next screen.');
+        }
     };
 
     const current = quiz[index];
     const isCorrect = selected === current?.correctAnswerIndex;
 
     const handleNext = () => {
-        if (!isReview && isCorrect) setScore(prev => prev + 1);
+        if (!isReview && isCorrect) setScore((prev) => prev + 1);
 
         if (index + 1 < quiz.length) {
             setIndex(index + 1);
@@ -127,7 +132,9 @@ export default function QuizScreen() {
         }
     };
 
-    if (!quiz.length) return <Text style={styles.status}>No Quiz Found! 🥲</Text>;
+    if (!quiz.length) {
+        return <Text style={styles.status}>No Quiz Found! 🥲</Text>;
+    }
 
     if (finished) {
         return (
@@ -140,9 +147,7 @@ export default function QuizScreen() {
                     style={{ width: 180, height: 180, alignSelf: 'center' }}
                 />
                 <Text style={styles.finalText}>🎉 Quiz Completed!</Text>
-                {!isReview && (
-                    <Text style={styles.scoreText}>Score: {score} / {quiz.length}</Text>
-                )}
+                {!isReview && <Text style={styles.scoreText}>Score: {score} / {quiz.length}</Text>}
                 <Button mode="contained" onPress={handleFinish} style={styles.button}>
                     Back to {isReview ? 'History' : 'Home'}
                 </Button>
@@ -151,75 +156,60 @@ export default function QuizScreen() {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingBottom:'50%' } } edges={['bottom']}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingBottom: '50%' }} edges={['bottom']}>
+            <View style={styles.container}>
+                <Text category="s1" style={styles.progress}>Question {index + 1} of {quiz.length}</Text>
+                <Text category="h6" style={styles.question}>{current?.question || 'Invalid question'}</Text>
 
-        <View style={styles.container}>
-            <Text category="s1" style={styles.progress}>Question {index + 1} of {quiz.length}</Text>
-            <Text category="h6" style={styles.question}>{current?.question}</Text>
-
-            {current?.choices.map((choice, i) => (
-                <TouchableOpacity
-                    key={i}
-                    onPress={() => !isReview && setSelected(i)}
-                    style={[
-                        styles.choiceButton,
-                        selected === i && styles.selectedChoiceButton
-                    ]}
-                    activeOpacity={0.7}
-                >
-                    <Text style={styles.choiceText}>{choice}</Text>
-                </TouchableOpacity>
-            ))}
-
-
-            {selected !== null && !showAnswer && !isReview && (
-                <Button
-                    mode="contained"
-                    onPress={() => setShowAnswer(true)}
-                    style={styles.button}
-                >
-                    Submit Answer
-                </Button>
-            )}
-
-            {showAnswer ? (
-                <>
-                    <LottieView
-                        source={isCorrect ? require('../assets/correctAnswer.json') : require('../assets/wrongAnswer.json')}
-                        autoPlay
-                        loop={false}
-                        style={{ width: 80, height: 80, alignSelf: 'center', marginVertical: 0 }}
-                    />
-                    <Text style={isCorrect ? styles.correctResult : styles.incorrectResult}>
-                        {isCorrect ? 'Correct!' : `Incorrect. Correct Answer:\n${current?.explanation}`}
-                    </Text>
-                    <Button
-                        mode="outlined"
-                        onPress={handleNext}
-                        style={styles.button}
+                {(current?.choices || []).map((choice, i) => (
+                    <TouchableOpacity
+                        key={i}
+                        onPress={() => !isReview && setSelected(i)}
+                        style={[
+                            styles.choiceButton,
+                            selected === i && styles.selectedChoiceButton
+                        ]}
+                        activeOpacity={0.7}
                     >
-                        {index + 1 < quiz.length ? 'Next Question' : 'Finish Quiz'}
+                        <Text style={styles.choiceText}>{choice}</Text>
+                    </TouchableOpacity>
+                ))}
+
+                {selected !== null && !showAnswer && !isReview && (
+                    <Button mode="contained" onPress={() => setShowAnswer(true)} style={styles.button}>
+                        Submit Answer
                     </Button>
-                </>
-            ) : isReview ? (
-                <>
-                    <Text style={styles.reviewExplanation}>
-                        {`Correct Answer: ${current?.choices[current.correctAnswerIndex]}`}
-                    </Text>
-                    <Button
-                        mode="outlined"
-                        onPress={handleNext}
-                        style={styles.buttonNext}
-                    >
-                        {index + 1 < quiz.length ? 'Next Question' : 'Finish Quiz'}
-                    </Button>
-                </>
-            ) : null}
-        </View>
+                )}
+
+                {showAnswer ? (
+                    <>
+                        <LottieView
+                            source={isCorrect ? require('../assets/correctAnswer.json') : require('../assets/wrongAnswer.json')}
+                            autoPlay
+                            loop={false}
+                            style={{ width: 80, height: 80, alignSelf: 'center', marginVertical: 0 }}
+                        />
+                        <Text style={isCorrect ? styles.correctResult : styles.incorrectResult}>
+                            {isCorrect ? 'Correct!' : `Incorrect. ${current?.explanation || ''}`}
+                        </Text>
+                        <Button mode="outlined" onPress={handleNext} style={styles.button}>
+                            {index + 1 < quiz.length ? 'Next Question' : 'Finish Quiz'}
+                        </Button>
+                    </>
+                ) : isReview ? (
+                    <>
+                        <Text style={styles.reviewExplanation}>
+                            {`Correct Answer: ${current?.choices?.[current.correctAnswerIndex] || 'N/A'}`}
+                        </Text>
+                        <Button mode="outlined" onPress={handleNext} style={styles.buttonNext}>
+                            {index + 1 < quiz.length ? 'Next Question' : 'Finish Quiz'}
+                        </Button>
+                    </>
+                ) : null}
+            </View>
         </SafeAreaView>
     );
 }
-
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 24, justifyContent: 'center', backgroundColor: '#fff',},
     progress: { fontSize: 18, color: '#555', marginBottom: 10 },
@@ -243,7 +233,6 @@ const styles = StyleSheet.create({
         color: '#333',
         lineHeight: 22,
     },
-
 
     button: { marginTop: 2 },buttonNext: { marginTop: 0},
     correctResult: { fontSize: 20, textAlign: 'center', color: 'green', marginTop: 0 },

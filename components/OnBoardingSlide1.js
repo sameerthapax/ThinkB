@@ -11,13 +11,25 @@ export default function OnBoardingSlide1() {
     useFocusEffect(
         React.useCallback(() => {
             const timeout = setTimeout(() => {
-                animationRef.current?.play();
+                try {
+                    animationRef.current?.play();
+                } catch (e) {
+                    console.warn('⚠️ Animation play failed (timeout):', e);
+                }
             }, 700);
+
             const interval = setInterval(() => {
-                animationRef.current?.play();
+                try {
+                    animationRef.current?.play();
+                } catch (e) {
+                    console.warn('⚠️ Animation play failed (interval):', e);
+                }
             }, 10 * 1000);
 
-            return () => {clearTimeout(timeout); clearInterval(interval);}
+            return () => {
+                clearTimeout(timeout);
+                clearInterval(interval);
+            };
         }, [])
     );
 
@@ -30,6 +42,7 @@ export default function OnBoardingSlide1() {
                     loop={false}
                     autoPlay={false}
                     style={{ width: 200, height: 200, marginTop: '20%', alignSelf: 'center' }}
+                    onError={(error) => console.error('❌ Lottie load failed:', error)}
                 />
                 <Text category="h4" style={styles.title}>
                     Welcome to <Text category="h4" style={styles.titleT}>Think</Text>

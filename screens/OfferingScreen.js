@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react'; // <--- IMPORTANT: Added useContext here
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native'; // Added Text for message box
+import React, { useEffect, useState, useContext } from 'react';
+import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import RevenueCatUI from 'react-native-purchases-ui';
 import Purchases from 'react-native-purchases';
 import { useNavigation } from '@react-navigation/native';
@@ -7,43 +7,51 @@ import { SubscriptionContext } from '../context/SubscriptionContext';
 
 export default function PaywallScreen() {
     const [offering, setOffering] = useState(null);
-    const [showMessageBox, setShowMessageBox] = useState(false); // State for custom message box
-    const [messageBoxText, setMessageBoxText] = useState(''); // Text for custom message box
+    const [showMessageBox, setShowMessageBox] = useState(false);
+    const [messageBoxText, setMessageBoxText] = useState('');
+    const [isMounted, setIsMounted] = useState(true); // Prevent setting state after unmount
+
     const navigation = useNavigation();
-    // Destructure 'refresh' from the SubscriptionContext
     const { refresh } = useContext(SubscriptionContext);
 
     useEffect(() => {
+        setIsMounted(true);
         const fetchOffer = async () => {
             try {
                 const offerings = await Purchases.getOfferings();
-                // Ensure the offering name matches exactly what you have in RevenueCat
-                // For example, if your offering in RevenueCat is named 'Advanced Membership'
-                // and it contains the 'AdvancedUser' entitlement.
-                setOffering(offerings.all['Advanced Membership']); // Assuming this is your offering name
-                console.log('Fetched Offering:', offerings.all['Advanced Membership']);
+                const selected = offerings.all['Advanced Membership'];
+                if (selected) {
+                    setOffering(selected);
+                    console.log('✅ Fetched Offering:', selected);
+                } else {
+                    throw new Error('Offering not found');
+                }
             } catch (error) {
-                console.error('❌ Error fetching offerings in PaywallScreen:', error);
-                // Optionally navigate back or show an error to the user if offerings fail to load
-                // navigation.goBack();
-                setMessageBoxText('Failed to load offerings. Please try again.');
-                setShowMessageBox(true);
+                console.error('❌ Error fetching offerings:', error);
+                if (isMounted) {
+                    setMessageBoxText('Failed to load offerings. Please try again later.');
+                    setShowMessageBox(true);
+                }
             }
         };
         fetchOffer();
-    }, []); // Runs once on component mount
+        return () => setIsMounted(false); // Cleanup
+    }, []);
 
-    // Display a loading indicator while offerings are being fetched
-    if (!offering) {
-        return (
-            <View style={styles.loaderContainer}>
-                <ActivityIndicator size="large" color="#0000ff" />
-                <Text style={{ marginTop: 10, color: '#666' }}>Loading paywall...</Text>
-            </View>
-        );
-    }
+    const handlePurchaseCompleted = async (purchase) => {
+        try {
+            console.log('✅ Purchase completed:', purchase);
+            await refresh();
+            navigation.goBack();
+            setMessageBoxText('Purchase successful! Your subscription is now active.');
+            setShowMessageBox(true);
+        } catch (err) {
+            console.error('❌ Error post-purchase:', err);
+            setMessageBoxText('Something went wrong after purchase. Please restart the app.');
+            setShowMessageBox(true);
+        }
+    };
 
-    // Custom message box component (replaces alert())
     const MessageBox = ({ message, onDismiss }) => (
         <View style={styles.messageBoxOverlay}>
             <View style={styles.messageBox}>
@@ -53,28 +61,30 @@ export default function PaywallScreen() {
         </View>
     );
 
+    if (!offering) {
+        return (
+            <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+                <Text style={{ marginTop: 10, color: '#666' }}>Loading paywall...</Text>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.fullScreen}>
             <RevenueCatUI.Paywall
                 options={{ offering }}
-                // Handle paywall dismissal (user closes it)
                 onDismiss={() => navigation.goBack()}
-                // Handle purchase cancellation
                 onPurchaseCancelled={() => {
-                    navigation.goBack();
-                    setMessageBoxText('Purchase cancelled. Please try again later.');
-                    setShowMessageBox(true);
+                    try {
+                        navigation.goBack();
+                        setMessageBoxText('Purchase cancelled. Please try again later.');
+                        setShowMessageBox(true);
+                    } catch (err) {
+                        console.error('⚠️ Purchase cancel error:', err);
+                    }
                 }}
-                // Handle successful purchase
-                onPurchaseCompleted={async (purchase) => {
-                    console.log('Purchase completed:', purchase);
-                    // Refresh the subscription status in the context
-                    await refresh();
-                    // Navigate back after successful purchase and refresh
-                    navigation.goBack();
-                    setMessageBoxText('Purchase successful! Your subscription is now active.');
-                    setShowMessageBox(true);
-                }}
+                onPurchaseCompleted={handlePurchaseCompleted}
             />
             {showMessageBox && (
                 <MessageBox
@@ -89,7 +99,7 @@ export default function PaywallScreen() {
 const styles = StyleSheet.create({
     fullScreen: {
         flex: 1,
-        backgroundColor: '#f9f9f9', // Slightly off-white background
+        backgroundColor: '#f9f9f9',
     },
     loaderContainer: {
         flex: 1,
@@ -106,7 +116,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1000, // Ensure it's above other content
+        zIndex: 1000,
     },
     messageBox: {
         width: 280,
@@ -128,11 +138,11 @@ const styles = StyleSheet.create({
     },
     messageButton: {
         fontSize: 16,
-        color: '#007aff', // iOS blue
+        color: '#007aff',
         fontWeight: '600',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
-        backgroundColor: '#e0f7fa', // Light blue background
+        backgroundColor: '#e0f7fa',
     },
 });

@@ -14,7 +14,12 @@ import { SubscriptionContext } from '../context/SubscriptionContext';
 export default function ExtractedTextScreen() {
     const route = useRoute();
     const navigation = useNavigation();
-    const { extractedText, fileName } = route.params;
+    const { extractedText = '', fileName = 'Untitled' } = route.params || {};
+    if (!extractedText) {
+        alert('Missing extracted text. Please try again.');
+        navigation.goBack();
+        return null;
+    }
     const { showAd } = useInterstitialAd();
 
     const [loading, setLoading] = useState(false);
@@ -39,10 +44,13 @@ export default function ExtractedTextScreen() {
 
         try {
             setLoading(true);
-            const settings = await AsyncStorage.getItem('quiz-settings');
-            const parsedSettings = settings
-                ? JSON.parse(settings)
-                : { quizLength: 5, difficulty: 'easy' };
+            let parsedSettings = { quizLength: 5, difficulty: 'easy' };
+            try {
+                const settings = await AsyncStorage.getItem('quiz-settings');
+                if (settings) parsedSettings = JSON.parse(settings);
+            } catch (err) {
+                console.warn('⚠️ Error parsing settings:', err);
+            }
             await refresh();
             // Determine user status
             let userStatus = 'normal';
@@ -71,12 +79,21 @@ export default function ExtractedTextScreen() {
                 return;
             }
 
-            if (!rawQuizText) {
+            if (!rawQuizText || rawQuizText.trim().length === 0) {
                 setLoading(false);
+                alert('AI could not generate a quiz. Try a different document.');
                 return;
             }
 
-            const parsedQuiz = parseQuizJson(rawQuizText);
+            let parsedQuiz = null;
+            try {
+                parsedQuiz = parseQuizJson(rawQuizText);
+            } catch (e) {
+                alert('Failed to parse quiz. Please try again.');
+                console.error('❌ parseQuizJson error:', e);
+                setLoading(false);
+                return;
+            }
             const todayKey = `quiz-${new Date().toISOString().split('T')[0]}`;
             await AsyncStorage.setItem(todayKey, JSON.stringify(parsedQuiz));
 
@@ -87,17 +104,24 @@ export default function ExtractedTextScreen() {
                 quiz: parsedQuiz,
             };
 
-            const existing = await AsyncStorage.getItem('study-materials');
-            const materialList = existing ? JSON.parse(existing) : [];
+            let materialList = [];
+            try {
+                const existing = await AsyncStorage.getItem('study-materials');
+                if (existing) materialList = JSON.parse(existing);
+            } catch (err) {
+                console.warn('⚠️ Failed to parse study materials:', err);
+            }
             materialList.push(materialEntry);
             await AsyncStorage.setItem('study-materials', JSON.stringify(materialList));
 
             setShowCheckmark(true);
             setTimeout(() => {
-                navigation.navigate('ThinkB', {
-                    screen: 'Quiz',
-                    params: { Quiz: parsedQuiz },
-                });
+                if (navigation && navigation.navigate) {
+                    navigation.navigate('ThinkB', {
+                        screen: 'Quiz',
+                        params: { Quiz: parsedQuiz },
+                    });
+                }
             }, 1500);
         } catch (error) {
             if (error.name === 'AbortError') {
