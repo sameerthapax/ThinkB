@@ -22,12 +22,12 @@ export default function PaywallScreen() {
                 const selected = offerings.all['Advanced Membership'];
                 if (selected) {
                     setOffering(selected);
-                    console.log('✅ Fetched Offering:', selected);
+                    __DEV__ && console.log('✅ Fetched Offering:', selected);
                 } else {
                     throw new Error('Offering not found');
                 }
             } catch (error) {
-                console.error('❌ Error fetching offerings:', error);
+                __DEV__ && console.error('❌ Error fetching offerings:', error);
                 if (isMounted) {
                     setMessageBoxText('Failed to load offerings. Please try again later.');
                     setShowMessageBox(true);
@@ -40,13 +40,12 @@ export default function PaywallScreen() {
 
     const handlePurchaseCompleted = async (purchase) => {
         try {
-            console.log('✅ Purchase completed:', purchase);
+            __DEV__ && console.log('✅ Purchase completed:', purchase);
             await refresh();
-            navigation.goBack();
             setMessageBoxText('Purchase successful! Your subscription is now active.');
             setShowMessageBox(true);
         } catch (err) {
-            console.error('❌ Error post-purchase:', err);
+            __DEV__ && console.error('❌ Error post-purchase:', err);
             setMessageBoxText('Something went wrong after purchase. Please restart the app.');
             setShowMessageBox(true);
         }
@@ -81,7 +80,7 @@ export default function PaywallScreen() {
                         setMessageBoxText('Purchase cancelled. Please try again later.');
                         setShowMessageBox(true);
                     } catch (err) {
-                        console.error('⚠️ Purchase cancel error:', err);
+                        __DEV__ && console.error('⚠️ Purchase cancel error:', err);
                     }
                 }}
                 onPurchaseCompleted={handlePurchaseCompleted}

@@ -14,7 +14,7 @@ export default function OnBoardingSlide3({ isActive }) {
                 animationRef.current?.reset();
                 animationRef.current?.play(40, 200); // Safe but reversed frame order (optional fix below)
             } catch (e) {
-                console.warn('⚠️ Animation play failed:', e);
+                __DEV__ && console.warn('⚠️ Animation play failed:', e);
             }
         }
 
@@ -22,7 +22,7 @@ export default function OnBoardingSlide3({ isActive }) {
             try {
                 animationRef.current?.reset();
             } catch (e) {
-                console.warn('⚠️ Animation reset failed:', e);
+                __DEV__ && console.warn('⚠️ Animation reset failed:', e);
             }
         }
     }, [isActive, isMounted]);
@@ -39,7 +39,7 @@ export default function OnBoardingSlide3({ isActive }) {
                     loop={true}
                     autoPlay={false}
                     style={{ width: 200, height: 200, marginTop: '20%', alignSelf: 'center' }}
-                    onError={(error) => console.error('❌ Lottie failed to load:', error)}
+                    onError={(error) => __DEV__ && console.error('❌ Lottie failed to load:', error)}
                 />
                 <Text category="h4" style={styles.title}>Train Your Brain</Text>
                 <Text style={styles.text}>

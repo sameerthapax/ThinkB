@@ -1,70 +1,70 @@
-import { useEffect, useRef, useState } from 'react';
-import { Platform } from 'react-native';
-import {
+import { Platform, StatusBar } from 'react-native';
+import mobileAds, {
     InterstitialAd,
     AdEventType,
+    MaxAdContentRating,
     TestIds,
 } from 'react-native-google-mobile-ads';
 
-const PROD_AD_UNIT_ID_IOS = 'ca-app-pub-2904800020194076/4851223573';
+const PROD_AD_UNIT_ID_IOS = 'ca-app-pub-2904800020194076/4405109823';
 const PROD_AD_UNIT_ID_ANDROID = 'ca-app-pub-2904800020194076/3865917723';
 
-export const useInterstitialAd = () => {
-    const adUnitId = __DEV__
-        ? TestIds.INTERSTITIAL
-        : Platform.select({
-            ios: PROD_AD_UNIT_ID_IOS,
-            android: PROD_AD_UNIT_ID_ANDROID,
-        });
-    const [isLoaded, setIsLoaded] = useState(false);
+const adUnitId = __DEV__
+    ? TestIds.INTERSTITIAL
+    :Platform.select({
+        ios: PROD_AD_UNIT_ID_IOS,
+        android: PROD_AD_UNIT_ID_ANDROID,
+    });
 
-    const interstitialRef = useRef(
-        InterstitialAd.createForAdRequest(adUnitId, {
-            requestNonPersonalizedAdsOnly: true,
-        })
-    );
+const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+    requestNonPersonalizedAdsOnly: true,
+});
 
-    useEffect(() => {
-        const interstitial = interstitialRef.current;
+let initialized = false;
+let isLoaded = false;
 
-        const onAdEvent = interstitial.addAdEventListener(AdEventType.LOADED, () => {
-            setIsLoaded(true);
-        });
+export const initAds = async () => {
+    if (initialized) return;
+    initialized = true;
 
-        const onAdError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
-            setIsLoaded(false);
-        });
+    await mobileAds().setRequestConfiguration({
+        maxAdContentRating: MaxAdContentRating.PG,
+        tagForChildDirectedTreatment: true,
+        tagForUnderAgeOfConsent: true,
+        testDeviceIdentifiers: ['EMULATOR'], // Replace if needed
+    });
 
-        interstitial.load();
+    await mobileAds().initialize();
+    interstitial.load();
 
-        return () => {
-            onAdEvent();
-            onAdError();
-        };
-    }, []);
+    interstitial.addAdEventListener(AdEventType.LOADED, () => {
+        isLoaded = true;
+        __DEV__ && console.log('✅ Interstitial ad loaded');
+    });
 
-    const showAd = () => {
-        return new Promise((resolve) => {
-            const interstitial = interstitialRef.current;
+    interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+        isLoaded = false;
+        interstitial.load(); // preload next
+        if (Platform.OS === 'ios') StatusBar.setHidden(false);
+    });
 
-            if (isLoaded) {
-                const onClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
-                    __DEV__ && console.log('✅ Interstitial ad closed');
-                    setIsLoaded(false);
-                    interstitial.load(); // preload next
-                    resolve();
-                    onClose();
-                });
-
-                interstitial.show();
-            } else {
-                __DEV__ && console.log('⚠️ Interstitial ad not ready');
-                resolve();
-            }
-        });
-    };
-
-    return {
-        showAd,
-    };
+    interstitial.addAdEventListener(AdEventType.OPENED, () => {
+        if (Platform.OS === 'ios') StatusBar.setHidden(true);
+    });
 };
+
+export const showInterstitialAd = () =>
+    new Promise((resolve) => {
+        if (!isLoaded) {
+            __DEV__ && console.log('⚠️ Ad not loaded yet');
+            return resolve();
+        }
+
+        try {
+            interstitial.show();
+        } catch (e) {
+            __DEV__ && console.error('❌ Failed to show ad:', e);
+        } finally {
+            resolve();
+        }
+    });

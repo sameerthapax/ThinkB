@@ -20,12 +20,12 @@ export default function PaywallScreenPremium() {
                 const selected = offerings?.all?.['Premium Membership'];
                 if (selected && isMounted) {
                     setOffering(selected);
-                    console.log('✅ Premium offering loaded:', selected);
+                    __DEV__ && console.log('✅ Premium offering loaded:', selected);
                 } else {
                     throw new Error('Premium offering not found');
                 }
             } catch (err) {
-                console.error('❌ Error fetching Premium offering:', err);
+                __DEV__ && console.error('❌ Error fetching Premium offering:', err);
                 if (isMounted) {
                     setErrorMessage('Failed to load premium options. Please try again later.');
                 }
@@ -67,16 +67,15 @@ export default function PaywallScreenPremium() {
                         navigation.goBack();
                         alert('Purchase cancelled. Please try again later.');
                     } catch (e) {
-                        console.error('⚠️ Cancel handler failed:', e);
+                        __DEV__ && console.error('⚠️ Cancel handler failed:', e);
                     }
                 }}
                 onPurchaseCompleted={async (purchase) => {
                     try {
-                        console.log('✅ Purchase completed:', purchase);
+                        __DEV__ && console.log('✅ Purchase completed:', purchase);
                         await refresh();
-                        navigation.goBack();
                     } catch (err) {
-                        console.error('❌ Failed after purchase:', err);
+                        __DEV__ && console.error('❌ Failed after purchase:', err);
                         alert('Purchase succeeded but something went wrong. Restart the app if needed.');
                     }
                 }}

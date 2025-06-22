@@ -19,11 +19,11 @@ export default function HistoryScreen() {
                     if (Array.isArray(parsed)) {
                         setHistory(parsed.reverse());
                     } else {
-                        console.warn('Unexpected format in quiz-history');
+                        __DEV__ && console.warn('Unexpected format in quiz-history');
                         setHistory([]);
                     }
                 } catch (err) {
-                    console.error('❌ Failed to load quiz history:', err);
+                    __DEV__ && console.error('❌ Failed to load quiz history:', err);
                     Alert.alert('Error', 'Unable to load quiz history.');
                     setHistory([]);
                 }
@@ -39,7 +39,7 @@ export default function HistoryScreen() {
                 params: { mode: 'review', reset: true, Quiz: quiz },
             });
         } catch (err) {
-            console.error('❌ Navigation error (review):', err);
+            __DEV__ && console.error('❌ Navigation error (review):', err);
             Alert.alert('Navigation Error', 'Could not open review screen.');
         }
     };
@@ -53,7 +53,7 @@ export default function HistoryScreen() {
                 params: { reset: true, Quiz: quiz },
             });
         } catch (err) {
-            console.error('❌ Retry error:', err);
+            __DEV__ && console.error('❌ Retry error:', err);
             Alert.alert('Error', 'Failed to retry quiz.');
         }
     };

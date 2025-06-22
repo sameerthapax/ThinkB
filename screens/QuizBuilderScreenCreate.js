@@ -41,7 +41,7 @@ export default function QuizBuilderScreenCreate({ route, navigation }) {
                 setCorrectIndex(null);
             }
         } catch (e) {
-            console.error('❌ Navigation failed:', e);
+            __DEV__ && console.error('❌ Navigation failed:', e);
             Alert.alert('Navigation error', 'Something went wrong. Please restart.');
         }
     };

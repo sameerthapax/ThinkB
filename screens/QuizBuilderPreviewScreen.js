@@ -22,14 +22,14 @@ export default function QuizPreviewScreen() {
             };
 
             await AsyncStorage.setItem(quizId, JSON.stringify(quizData));
-            console.log('✅ Quiz saved to AsyncStorage:', quizId);
+            __DEV__ && console.log('✅ Quiz saved to AsyncStorage:', quizId);
 
             navigation.navigate('ThinkB', {
                 screen: 'Quiz',
                 params: { Quiz: questions, reset: true },
             });
         } catch (err) {
-            console.error('❌ Failed to save quiz:', err);
+            __DEV__ && console.error('❌ Failed to save quiz:', err);
             Alert.alert('Error', 'Failed to save the quiz. Please try again.');
         }
     };

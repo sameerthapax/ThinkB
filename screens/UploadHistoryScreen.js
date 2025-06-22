@@ -19,18 +19,18 @@ export default function UploadHistoryScreen() {
                         if (Array.isArray(parsed)) {
                             setMaterials(parsed.reverse());
                         } else {
-                            console.warn('📛 Stored materials is not an array');
+                            __DEV__ && console.warn('📛 Stored materials is not an array');
                             setMaterials([]);
                         }
                     } catch (parseErr) {
-                        console.error('❌ Failed to parse study-materials:', parseErr);
+                        __DEV__ && console.error('❌ Failed to parse study-materials:', parseErr);
                         setMaterials([]);
                     }
                 } else {
                     setMaterials([]);
                 }
             } catch (err) {
-                console.error('❌ Failed to load study-materials:', err);
+                __DEV__ && console.error('❌ Failed to load study-materials:', err);
                 setMaterials([]);
             }
         };
@@ -39,7 +39,7 @@ export default function UploadHistoryScreen() {
 
     const handlePress = (item) => {
         if (!item?.fileName || !item?.text) {
-            console.warn('⚠️ Incomplete material object, skipping navigation');
+            __DEV__ && console.warn('⚠️ Incomplete material object, skipping navigation');
             return;
         }
 

@@ -37,7 +37,7 @@ export default function QuizScreen() {
                         else throw new Error('Parsed quiz is not an array');
                     }
                 } catch (err) {
-                    console.error('❌ Failed to load quiz:', err);
+                    __DEV__ && console.error('❌ Failed to load quiz:', err);
                     Alert.alert('Error', 'Unable to load quiz data.');
                 }
             };
@@ -84,7 +84,7 @@ export default function QuizScreen() {
                         await updateStreakAfterQuiz();
                     }
                 } catch (err) {
-                    console.error('❌ Error saving history or updating streak:', err);
+                    __DEV__ && console.error('❌ Error saving history or updating streak:', err);
                 }
             };
 
@@ -112,7 +112,7 @@ export default function QuizScreen() {
         try {
             navigation.navigate(isReview ? 'History' : 'Home');
         } catch (err) {
-            console.error('❌ Navigation error:', err);
+            __DEV__ && console.error('❌ Navigation error:', err);
             Alert.alert('Error', 'Unable to navigate to the next screen.');
         }
     };

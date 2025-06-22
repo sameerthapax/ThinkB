@@ -31,14 +31,14 @@ export default function MyQuizScreen() {
                                 questions: quiz.questions || [],
                             };
                         } catch (err) {
-                            console.warn('⚠️ Failed to parse quiz:', err);
+                            __DEV__ && console.warn('⚠️ Failed to parse quiz:', err);
                             return null;
                         }
                     }).filter(Boolean);
 
                     setQuizzes(parsedQuizzes);
                 } catch (err) {
-                    console.error('❌ Failed to load quizzes:', err);
+                    __DEV__ && console.error('❌ Failed to load quizzes:', err);
                     alert('Something went wrong while loading your quizzes.');
                 } finally {
                     setLoading(false);
@@ -73,7 +73,7 @@ export default function MyQuizScreen() {
                 params: { reset: true, Quiz: quiz }
             });
         } catch (err) {
-            console.error('❌ Failed to retry quiz:', err);
+            __DEV__ && console.error('❌ Failed to retry quiz:', err);
             alert('Could not retry this quiz. Try again later.');
         }
     };

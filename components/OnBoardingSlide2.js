@@ -14,13 +14,13 @@ export default function OnBoardingSlide2({ isActive }) {
                 animationRef.current?.reset();
                 animationRef.current?.play(300, 0); // May not be valid range — catch below
             } catch (e) {
-                console.warn('⚠️ Animation failed to play:', e);
+                __DEV__ && console.warn('⚠️ Animation failed to play:', e);
             }
         } else if (isMounted) {
             try {
                 animationRef.current?.reset();
             } catch (e) {
-                console.warn('⚠️ Animation reset failed:', e);
+                __DEV__ && console.warn('⚠️ Animation reset failed:', e);
             }
         }
     }, [isActive, isMounted]);
@@ -37,7 +37,7 @@ export default function OnBoardingSlide2({ isActive }) {
                     loop
                     autoPlay={false}
                     style={{ width: 200, height: 200, marginTop: '20%', alignSelf: 'center' }}
-                    onError={(error) => console.error('❌ Lottie load error:', error)}
+                    onError={(error) => __DEV__ && console.error('❌ Lottie load error:', error)}
                 />
                 <Text category="h4" style={styles.title}>Track Your Streaks 🔥</Text>
                 <Text style={styles.text}>Stay consistent and unlock rewards.</Text>

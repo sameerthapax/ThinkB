@@ -16,7 +16,7 @@ export default function OnboardingScreen({ navigation }) {
             try {
                 flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
             } catch (e) {
-                console.warn('⚠️ Failed to scroll to next onboarding screen:', e);
+                __DEV__ && console.warn('⚠️ Failed to scroll to next onboarding screen:', e);
             }
         } else {
             finishOnboarding();
@@ -28,7 +28,7 @@ export default function OnboardingScreen({ navigation }) {
             await AsyncStorage.setItem('hasSeenOnboarding', 'true');
             navigation.replace('ThinkB');
         } catch (err) {
-            console.error('❌ Failed to save onboarding state or navigate:', err);
+            __DEV__ && console.error('❌ Failed to save onboarding state or navigate:', err);
             Alert.alert('Error', 'Failed to finish onboarding. Please try again.');
         }
     };

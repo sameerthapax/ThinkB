@@ -11,6 +11,7 @@ import * as Haptics from 'expo-haptics';
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundTask from 'expo-background-task';
 
+
 // Screens
 import HomeScreen from './screens/HomeScreen';
 import UploadScreen from './screens/UploadScreen';
@@ -33,6 +34,7 @@ import { checkStreakOnLaunch } from './utils/checkStreakOnLaunch';
 import { initializeAppStorage } from './utils/initializeAppStorage';
 import { runBackgroundQuizGeneration, TASK_NAME } from './utils/backgroundTask';
 import { SubscriptionProvider } from './context/SubscriptionContext';
+import { initAds } from './utils/showAds';
 
 const Stack = createNativeStackNavigator();
 
@@ -81,7 +83,7 @@ const TabNavigator = () => (
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         navigate(routeName)
                             } catch (err) {
-                            console.error('❌ Navigation error:', err);
+                            __DEV__ && console.error('❌ Navigation error:', err);
                         }
                     }}
                 />
@@ -97,11 +99,11 @@ const TabNavigator = () => (
 );
 
 TaskManager.defineTask(TASK_NAME, async () => {
-    console.log('📡 Running background fetch task...');
+    __DEV__ && console.log('📡 Running background fetch task...');
     return await runBackgroundQuizGeneration()
         .then(() => BackgroundTask.BackgroundFetchResult.NewData)
         .catch(err => {
-            console.error('❌ Background task failed:', err);
+            __DEV__ && console.error('❌ Background task failed:', err);
             return BackgroundTask.BackgroundFetchResult.Failed;
         });
 });
@@ -115,10 +117,10 @@ const registerBackgroundTask = async () => {
                 stopOnTerminate: false,
                 startOnBoot: true,
             });
-            console.log('✅ Background task registered');
+            __DEV__ && console.log('✅ Background task registered');
         }
     } catch (err) {
-        console.error('❌ Error registering background task:', err);
+        __DEV__ && console.error('❌ Error registering background task:', err);
         alert('Failed to set up daily auto-quiz. Please enable background services.');
     }
 };
@@ -128,6 +130,7 @@ export default function App() {
     const [initialRoute, setInitialRoute] = useState(null);
 
     useEffect(() => {
+        initAds();
         registerBackgroundTask();
     }, []);
     useEffect(() => {
@@ -142,7 +145,7 @@ export default function App() {
                     setInitialRoute('ThinkB');
                 }
             } catch (e) {
-                console.error('🚨 Error checking first launch:', e);
+                __DEV__ && console.error('🚨 Error checking first launch:', e);
                 alert('Something went wrong while starting the app. Please restart.');
                 setInitialRoute('ThinkB'); // fallback to app home
             }
@@ -152,7 +155,7 @@ export default function App() {
             try {
                 await checkStreakOnLaunch();
             } catch (e) {
-                console.error('⚠️ Error checking streak:', e);
+                __DEV__ && console.error('⚠️ Error checking streak:', e);
             }
         };
         init();

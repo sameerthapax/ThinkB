@@ -34,7 +34,7 @@ export default function SettingsScreen() {
                     if (settings.difficulty) setDifficulty(settings.difficulty);
                 }
             } catch (error) {
-                console.error('❌ Error loading quiz-settings:', error);
+                __DEV__ && console.error('❌ Error loading quiz-settings:', error);
             } finally {
                 setSettingsLoaded(true);
             }
@@ -48,7 +48,7 @@ export default function SettingsScreen() {
                 const settings = { quizLength, reminderEnabled, reminderTime, difficulty };
                 await AsyncStorage.setItem('quiz-settings', JSON.stringify(settings));
             } catch (err) {
-                console.error('❌ Failed to save quiz-settings:', err);
+                __DEV__ && console.error('❌ Failed to save quiz-settings:', err);
             }
         };
         saveSettings();
@@ -64,7 +64,7 @@ export default function SettingsScreen() {
                     await Notifications.cancelAllScheduledNotificationsAsync();
                 }
             } catch (err) {
-                console.error('❌ Reminder toggle error:', err);
+                __DEV__ && console.error('❌ Reminder toggle error:', err);
             }
         };
         updateReminder();
@@ -96,23 +96,24 @@ export default function SettingsScreen() {
             date.setHours(time.getHours(), time.getMinutes(), 0, 0);
             if (date <= now) date.setDate(date.getDate() + 1);
 
-            await Notifications.scheduleNotificationAsync({
-                content: {
-                    title: 'Time to Study 🧠',
-                    body: 'Your daily ThinkB quiz is ready!',
-                    sound: true,
-                },
-                trigger: {
-                    hour: date.getHours(),
-                    minute: date.getMinutes(),
-                    repeats: true,
-                },
-            });
+            // await Notifications.scheduleNotificationAsync({
+            //     content: {
+            //         title: 'Time to Study 🧠',
+            //         body: 'Your daily ThinkB quiz is ready!',
+            //         sound: true,
+            //     },
+            //     trigger: {
+            //         type: Notifications.SchedulableTriggerInputTypes.DAILY,
+            //         hour: date.getHours(),
+            //         minute: date.getMinutes(),
+            //         repeats: true,
+            //     },
+            // });
 
             const scheduled = await getAllScheduledNotificationsAsync();
-            console.log('🔔 Scheduled Notifications:', scheduled);
+            __DEV__ && console.log('🔔 Scheduled Notifications:', scheduled);
         } catch (err) {
-            console.error('❌ Notification scheduling error:', err);
+            __DEV__ && console.error('❌ Notification scheduling error:', err);
         }
     };
 
@@ -227,7 +228,7 @@ export default function SettingsScreen() {
                         </Button>
                     )}
 
-                    <Pressable onPress={() => Linking.openURL('https://sameerthapa.dev')}>
+                    <Pressable onPress={() => Linking.openURL('https://apps.apple.com/account/subscriptions')}>
                         <Text style={styles.cancelLink}>Cancel</Text>
                     </Pressable>
                     <View style={styles.linkRow}>

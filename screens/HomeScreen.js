@@ -16,26 +16,26 @@ import { parseQuizJson } from '../utils/parseQuiz';
 const checkScheduledNotifications = async () => {
     try {
         const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-        console.log('📅 Scheduled notifications:', scheduled);
+        __DEV__ && console.log('📅 Scheduled notifications:', scheduled);
 
         if (scheduled.length === 0) {
-            console.log('ℹ️ No notifications are currently scheduled.');
+            __DEV__ && console.log('ℹ️ No notifications are currently scheduled.');
         } else {
             scheduled.forEach((notif, index) => {
-                console.log(`🔔 Notification ${index + 1}:`, notif.trigger?.date || notif.trigger.dateComponents);
+                __DEV__ && console.log(`🔔 Notification ${index + 1}:`, notif.trigger?.date || notif.trigger.dateComponents);
             });
         }
     } catch (err) {
-        console.error('❌ Error fetching scheduled notifications:', err);
+        __DEV__ && console.error('❌ Error fetching scheduled notifications:', err);
     }
 };
 const logAsyncStorage = async () => {
     try {
         const keys = await AsyncStorage.getItem('quizAT-2025-06-14');
         // const stores = await AsyncStorage.multiGet(keys);
-        console.log('📦 AsyncStorage Contents:', keys);
+        __DEV__ && console.log('📦 AsyncStorage Contents:', keys);
     } catch (e) {
-        console.error('❌ Error reading AsyncStorage:', e);
+        __DEV__ && console.error('❌ Error reading AsyncStorage:', e);
     }
 };
 
@@ -57,7 +57,7 @@ export default function HomeScreen({ navigation }) {
             await runBackgroundQuizGeneration();
         } catch (err) {
             alert('Failed to run background quiz generation');
-            console.error('⚠️ Background task failed:', err);
+            __DEV__ && console.error('⚠️ Background task failed:', err);
         }
     };
     useEffect(() => {
@@ -79,7 +79,7 @@ export default function HomeScreen({ navigation }) {
                     }, 2000);
                 }
             } catch (err) {
-                console.error('❌ Failed to auto-navigate to quiz:', err);
+                __DEV__ && console.error('❌ Failed to auto-navigate to quiz:', err);
             }
         };
         checkAndNavigateToQuiz();
@@ -117,7 +117,7 @@ export default function HomeScreen({ navigation }) {
                 headerRight: () => renderRightActions(navigation),
             });
         } catch (e) {
-            console.warn('⚠️ Failed to set header options:', e);
+            __DEV__ && console.warn('⚠️ Failed to set header options:', e);
         }
     }, [navigation]);
 
@@ -132,7 +132,7 @@ export default function HomeScreen({ navigation }) {
                     const streakData = storedStreak ? JSON.parse(storedStreak) : { streak: 0 };
                     setStreak(streakData.streak);
                 } catch (e) {
-                    console.warn('⚠️ Error loading streak:', e);
+                    __DEV__ && console.warn('⚠️ Error loading streak:', e);
                     setStreak(0);
                 }
 
@@ -159,7 +159,7 @@ export default function HomeScreen({ navigation }) {
                     setTotalQuizToday(todaysQuizzes.length);
                     setTodayTotalDocument(todaysFileHistory.length);
                 } catch (e) {
-                    console.error('❌ Error reading history:', e);
+                    __DEV__ && console.error('❌ Error reading history:', e);
                     setTodayScore(0);
                     setTotalQuizToday(0);
                     setTodayTotalDocument(0);
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     streakCard: {
-        borderRadius: 20,
+        borderRadius: 30,
         backgroundColor: '#FFE599',
         padding: 24,
         marginBottom: 24,
@@ -372,7 +372,10 @@ const styles = StyleSheet.create({
 
     todaysQuizCard: {
         backgroundColor: '#f3f4f6',
-        borderRadius: 16,
+        borderTopLeftRadius: 26,
+        borderTopRightRadius: 26,
+        borderBottomLeftRadius: 19,
+        borderBottomRightRadius: 19,
         padding: 16,
         marginBottom: 24,
 

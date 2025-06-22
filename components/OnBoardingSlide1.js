@@ -14,7 +14,7 @@ export default function OnBoardingSlide1() {
                 try {
                     animationRef.current?.play();
                 } catch (e) {
-                    console.warn('⚠️ Animation play failed (timeout):', e);
+                    __DEV__ && console.warn('⚠️ Animation play failed (timeout):', e);
                 }
             }, 700);
 
@@ -22,7 +22,7 @@ export default function OnBoardingSlide1() {
                 try {
                     animationRef.current?.play();
                 } catch (e) {
-                    console.warn('⚠️ Animation play failed (interval):', e);
+                    __DEV__ && console.warn('⚠️ Animation play failed (interval):', e);
                 }
             }, 10 * 1000);
 
@@ -42,7 +42,7 @@ export default function OnBoardingSlide1() {
                     loop={false}
                     autoPlay={false}
                     style={{ width: 200, height: 200, marginTop: '20%', alignSelf: 'center' }}
-                    onError={(error) => console.error('❌ Lottie load failed:', error)}
+                    onError={(error) => __DEV__ && console.error('❌ Lottie load failed:', error)}
                 />
                 <Text category="h4" style={styles.title}>
                     Welcome to <Text category="h4" style={styles.titleT}>Think</Text>

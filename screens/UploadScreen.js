@@ -3,11 +3,12 @@ import { StyleSheet, ActivityIndicator, View, Alert } from 'react-native';
 import { Layout, Text, Button } from '@ui-kitten/components';
 import * as DocumentPicker from 'expo-document-picker';
 import { useNavigation } from '@react-navigation/native';
-import { useInterstitialAd } from '../utils/showAds';
+import { showInterstitialAd } from '../utils/showAds';
 import * as FileSystem from 'expo-file-system';
 import { WebView } from 'react-native-webview';
 import LottieView from 'lottie-react-native';
 import { SubscriptionContext } from '../context/SubscriptionContext';
+
 
 export default function UploadScreen() {
     const [loading, setLoading] = useState(false);
@@ -15,9 +16,11 @@ export default function UploadScreen() {
     const [pdfBase64, setPdfBase64] = useState(null);
     const navigation = useNavigation();
     const webviewRef = useRef(null);
-    const { showAd } = useInterstitialAd();
     const { isProUser = false, isAdvancedUser = false, refresh } = useContext(SubscriptionContext); // fallback added
 
+    const handleShowAd = async () => {
+        await showInterstitialAd();
+    };
     const handleUpload = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
@@ -34,7 +37,8 @@ export default function UploadScreen() {
             await refresh?.(); // optional chaining in case refresh is undefined
 
             if (!isProUser && !isAdvancedUser) {
-                await showAd?.(); // safe check for ad function
+                await handleShowAd?.();
+
             }
 
             const file = result.assets[0];
@@ -48,7 +52,7 @@ export default function UploadScreen() {
 
             setPdfBase64(base64);
         } catch (error) {
-            console.error('❌ Error uploading PDF:', error);
+            __DEV__ && console.error('❌ Error uploading PDF:', error);
             setLoading(false);
             Alert.alert('Error', 'Something went wrong during upload.');
         }
@@ -116,7 +120,7 @@ export default function UploadScreen() {
                     originWhitelist={['*']}
                     onMessage={handleMessage}
                     onError={(e) => {
-                        console.error('❌ WebView error:', e?.nativeEvent);
+                        __DEV__ && console.error('❌ WebView error:', e?.nativeEvent);
                         setLoading(false);
                         setPdfBase64(null);
                         Alert.alert('Error', 'WebView failed to load. Try again.');

@@ -1,45 +1,63 @@
 export const parseQuizJson = (text) => {
   try {
-    // Step 1: Locate the JSON array in the text
     const jsonStart = text.indexOf('[');
     const jsonEnd = text.lastIndexOf(']') + 1;
 
-    if (jsonStart === -1 || jsonEnd === -1) {
-      throw new Error('JSON array not found in the input.');
+    if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
+      throw new Error('⚠️ JSON array not found or malformed in AI response.');
     }
 
-    const jsonString = text.slice(jsonStart, jsonEnd);
-    const rawArray = JSON.parse(jsonString);
+    const jsonString = text.slice(jsonStart, jsonEnd).trim();
 
-    const parsed = rawArray.map((q) => {
-      // If format is using 'answer', calculate the index
-      if (typeof q.correctAnswerIndex === 'undefined' && q.answer) {
-        const index = q.choices.indexOf(q.answer);
-        return {
-          question: q.question,
-          choices: q.choices,
-          correctAnswerIndex: index,
-          explanation: q.answer,
-        };
-      }
+    let rawArray;
+    try {
+      rawArray = JSON.parse(jsonString);
+    } catch (parseErr) {
+      throw new Error('🧨 JSON.parse failed: ' + parseErr.message);
+    }
 
-      // If format already has correctAnswerIndex and explanation
-      return {
-        question: q.question,
-        choices: q.choices,
-        correctAnswerIndex: q.correctAnswerIndex,
-        explanation: q.explanation || q.choices[q.correctAnswerIndex] || '',
-      };
-    }).filter(q =>
-        q.question &&
-        Array.isArray(q.choices) &&
-        q.choices.length === 4 &&
-        q.correctAnswerIndex >= 0
-    );
+    if (!Array.isArray(rawArray)) {
+      throw new Error('🧩 Parsed content is not an array.');
+    }
+
+    const parsed = rawArray
+        .map((q, i) => {
+          if (
+              !q ||
+              typeof q.question !== 'string' ||
+              !Array.isArray(q.choices) ||
+              q.choices.length !== 4
+          ) {
+            __DEV__ && console.warn(`⚠️ Skipping invalid question at index ${i}`);
+            return null;
+          }
+
+          // Determine the correctAnswerIndex
+          let index = q.correctAnswerIndex;
+          if (typeof index === 'undefined' && q.answer) {
+            index = q.choices.indexOf(q.answer);
+          }
+
+          if (typeof index !== 'number' || index < 0 || index > 3) {
+            __DEV__ && console.warn(`⚠️ Invalid or missing answer index at question ${i}`);
+            return null;
+          }
+
+          return {
+            question: q.question.trim(),
+            choices: q.choices.map((c) => c.trim()),
+            correctAnswerIndex: index,
+            explanation:
+                typeof q.explanation === 'string'
+                    ? q.explanation.trim()
+                    : q.choices[index] || '',
+          };
+        })
+        .filter(Boolean); // Filter out any nulls from bad questions
 
     return parsed;
   } catch (err) {
-    console.error('❌ Failed to parse quiz JSON:', err.message);
+    __DEV__ && console.error('❌ Failed to parse quiz JSON:', err.message);
     return [];
   }
 };

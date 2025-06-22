@@ -4,7 +4,7 @@ import { Button, Text } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateQuizFromText } from '../utils/generateQuiz';
 import { parseQuizJson } from '../utils/parseQuiz';
-import { useInterstitialAd } from '../utils/showAds';
+import { showInterstitialAd } from '../utils/showAds';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 
@@ -20,8 +20,10 @@ export default function ExtractedTextScreen() {
         navigation.goBack();
         return null;
     }
-    const { showAd } = useInterstitialAd();
 
+    const handleShowAd = async () => {
+        await showInterstitialAd();
+    };
     const [loading, setLoading] = useState(false);
     const [showCheckmark, setShowCheckmark] = useState(false);
     const abortControllerRef = useRef(new AbortController());
@@ -31,7 +33,7 @@ export default function ExtractedTextScreen() {
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
             if (loading) {
-                console.log('🛑 Navigation event detected, aborting...');
+                __DEV__ && console.log('🛑 Navigation event detected, aborting...');
                 abortControllerRef.current.abort();
             }
         });
@@ -49,7 +51,7 @@ export default function ExtractedTextScreen() {
                 const settings = await AsyncStorage.getItem('quiz-settings');
                 if (settings) parsedSettings = JSON.parse(settings);
             } catch (err) {
-                console.warn('⚠️ Error parsing settings:', err);
+                __DEV__ && console.warn('⚠️ Error parsing settings:', err);
             }
             await refresh();
             // Determine user status
@@ -59,7 +61,7 @@ export default function ExtractedTextScreen() {
             } else if (isAdvancedUser) {
                 userStatus = 'advanced';
             }else {
-                await showAd(); // Show ad before processing if not a pro user
+                await handleShowAd?.(); // Show ad before processing if not a pro user
             }
 
             const rawQuizText = await generateQuizFromText(
@@ -90,7 +92,7 @@ export default function ExtractedTextScreen() {
                 parsedQuiz = parseQuizJson(rawQuizText);
             } catch (e) {
                 alert('Failed to parse quiz. Please try again.');
-                console.error('❌ parseQuizJson error:', e);
+                __DEV__ && console.error('❌ parseQuizJson error:', e);
                 setLoading(false);
                 return;
             }
@@ -109,7 +111,7 @@ export default function ExtractedTextScreen() {
                 const existing = await AsyncStorage.getItem('study-materials');
                 if (existing) materialList = JSON.parse(existing);
             } catch (err) {
-                console.warn('⚠️ Failed to parse study materials:', err);
+                __DEV__ && console.warn('⚠️ Failed to parse study materials:', err);
             }
             materialList.push(materialEntry);
             await AsyncStorage.setItem('study-materials', JSON.stringify(materialList));
@@ -125,9 +127,9 @@ export default function ExtractedTextScreen() {
             }, 1500);
         } catch (error) {
             if (error.name === 'AbortError') {
-                console.log('🛑 Quiz generation aborted by user');
+                __DEV__ && console.log('🛑 Quiz generation aborted by user');
             } else {
-                console.error('❌ Quiz generation failed:', error);
+                __DEV__ && console.error('❌ Quiz generation failed:', error);
             }
         } finally {
             setLoading(false);

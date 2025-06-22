@@ -30,7 +30,7 @@ export default function QuizBuilderScreenStart() {
                 QuizTitle: quizTitle.trim(),
             });
         } catch (err) {
-            console.error('❌ Navigation error:', err);
+            __DEV__ && console.error('❌ Navigation error:', err);
             Alert.alert('Navigation Error', 'Could not start quiz creation. Please try again.');
         }
     };
